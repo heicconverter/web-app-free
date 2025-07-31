@@ -2,25 +2,29 @@
   "name": "heic-converter",
   "version": "1.0.0",
   "main": "index.js",
-"scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "lint": "next lint",
-  "lint:fix": "next lint --fix",
-  "format": "prettier --write .",
-  "format:check": "prettier --check .",
-  "type-check": "tsc --noEmit"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^9.32.0",
+    "eslint-config-next": "^15.4.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-react": "^7.37.5",
@@ -28,5 +32,9 @@
     "react": "^19.1.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
+  },
+  "dependencies": {
+    "next": "^15.4.5",
+    "react-dom": "^19.1.1"
   }
 }
