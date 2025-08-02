@@ -1,21 +1,54 @@
 import React from 'react';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type PolymorphicRef<C extends React.ElementType> = React.ComponentPropsWithRef<C>['ref'];
+
+type AsProp<C extends React.ElementType> = {
+  as?: C;
+};
+
+type PropsToOmit<C extends React.ElementType, P> = keyof (AsProp<C> & P);
+
+type PolymorphicComponentProp<
+  C extends React.ElementType,
+  Props = {}
+> = React.PropsWithChildren<Props & AsProp<C>> & 
+  Omit<React.ComponentPropsWithoutRef<C>, PropsToOmit<C, Props>>;
+
+type PolymorphicComponentPropWithRef<
+  C extends React.ElementType,
+  Props = {}
+> = PolymorphicComponentProp<C, Props> & { ref?: PolymorphicRef<C> };
+
+type ButtonOwnProps = {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
-  children: React.ReactNode;
-}
+};
 
-export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  children,
-  className = '',
-  disabled,
-  ...props
-}) => {
+type ButtonProps<C extends React.ElementType = 'button'> = PolymorphicComponentPropWithRef<
+  C,
+  ButtonOwnProps
+>;
+
+type ButtonComponent = <C extends React.ElementType = 'button'>(
+  props: ButtonProps<C>
+) => React.ReactElement | null;
+
+export const Button: ButtonComponent = React.forwardRef(
+  <C extends React.ElementType = 'button'>(
+    {
+      as,
+      variant = 'primary',
+      size = 'md',
+      isLoading = false,
+      children,
+      className = '',
+      disabled,
+      ...props
+    }: ButtonProps<C>,
+    ref?: PolymorphicRef<C>
+  ) => {
+    const Component = as || 'button';
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantStyles = {
@@ -31,16 +64,17 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-lg',
   };
   
-  const isDisabled = disabled || isLoading;
-  
-  return (
-    <button
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
-        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-      } ${className}`}
-      disabled={isDisabled}
-      {...props}
-    >
+    const isDisabled = disabled || isLoading;
+    
+    return (
+      <Component
+        ref={ref}
+        className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
+          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+        } ${className}`}
+        disabled={isDisabled}
+        {...props}
+      >
       {isLoading && (
         <svg
           className="animate-spin -ml-1 mr-3 h-5 w-5"
@@ -63,7 +97,8 @@ export const Button: React.FC<ButtonProps> = ({
           />
         </svg>
       )}
-      {children}
-    </button>
-  );
-};
+        {children}
+      </Component>
+    );
+  }
+);
