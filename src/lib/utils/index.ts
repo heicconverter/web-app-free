@@ -93,3 +93,5 @@ export function isHeicFile(file: File): boolean {
          file.type === 'image/heic' || 
          file.type === 'image/heif';
 }
+
+export * from '../logger';
