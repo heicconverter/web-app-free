@@ -52,3 +52,6 @@ export interface AppSettings {
   autoDownload: boolean;
   theme: 'light' | 'dark' | 'system';
 }
+
+// Database types
+export * from './database';
