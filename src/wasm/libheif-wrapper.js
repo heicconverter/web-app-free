@@ -41,10 +41,10 @@ class HeifDecoder {
 
     try {
       const uint8Array = new Uint8Array(heicData);
-      
+
       // Decode using libheif-js
       const result = await this.decoder.decode(uint8Array);
-      
+
       if (!result || !result.image) {
         throw new Error('Failed to decode HEIC image');
       }
@@ -53,14 +53,18 @@ class HeifDecoder {
       const image = result.image;
       const width = image.get_width();
       const height = image.get_height();
-      
+
       // Get RGB data
-      const rgbData = image.display({ data: new Uint8ClampedArray(width * height * 4), width, height });
-      
-      return { 
-        width, 
-        height, 
-        data: rgbData 
+      const rgbData = image.display({
+        data: new Uint8ClampedArray(width * height * 4),
+        width,
+        height,
+      });
+
+      return {
+        width,
+        height,
+        data: rgbData,
       };
     } catch (error) {
       console.error('HEIC decode error:', error);
@@ -76,7 +80,7 @@ class HeifDecoder {
    */
   async convertToJPEG(heicData, quality = 90) {
     const { width, height, data } = await this.decode(heicData);
-    
+
     // Create canvas and draw image
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -84,16 +88,20 @@ class HeifDecoder {
     const ctx = canvas.getContext('2d');
     const imageData = new ImageData(data, width, height);
     ctx.putImageData(imageData, 0, 0);
-    
+
     // Convert to JPEG blob
     return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Failed to create JPEG blob'));
-        }
-      }, 'image/jpeg', quality / 100);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create JPEG blob'));
+          }
+        },
+        'image/jpeg',
+        quality / 100
+      );
     });
   }
 
@@ -104,7 +112,7 @@ class HeifDecoder {
    */
   async convertToPNG(heicData) {
     const { width, height, data } = await this.decode(heicData);
-    
+
     // Create canvas and draw image
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -112,7 +120,7 @@ class HeifDecoder {
     const ctx = canvas.getContext('2d');
     const imageData = new ImageData(data, width, height);
     ctx.putImageData(imageData, 0, 0);
-    
+
     // Convert to PNG blob
     return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
@@ -139,23 +147,22 @@ class HeifDecoder {
    * @returns {boolean} - True if valid HEIC/HEIF
    */
   static isHEIC(buffer) {
-    const uint8Array = buffer instanceof ArrayBuffer 
-      ? new Uint8Array(buffer) 
-      : buffer;
-    
+    const uint8Array =
+      buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+
     // Check for HEIC/HEIF file signature
     // HEIF files start with 'ftyp' box at offset 4
     if (uint8Array.length < 12) return false;
-    
+
     const ftyp = String.fromCharCode(
       uint8Array[4],
       uint8Array[5],
       uint8Array[6],
       uint8Array[7]
     );
-    
+
     if (ftyp !== 'ftyp') return false;
-    
+
     // Check for HEIC/HEIF brand
     const brand = String.fromCharCode(
       uint8Array[8],
@@ -163,8 +170,18 @@ class HeifDecoder {
       uint8Array[10],
       uint8Array[11]
     );
-    
-    const heicBrands = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs', 'mif1'];
+
+    const heicBrands = [
+      'heic',
+      'heix',
+      'hevc',
+      'hevx',
+      'heim',
+      'heis',
+      'hevm',
+      'hevs',
+      'mif1',
+    ];
     return heicBrands.includes(brand);
   }
 }

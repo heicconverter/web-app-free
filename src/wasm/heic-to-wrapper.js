@@ -15,20 +15,22 @@ class SimpleHeicConverter {
   static async convertToJPEG(heicInput, quality = 90) {
     try {
       let inputBuffer;
-      
+
       if (heicInput instanceof File || heicInput instanceof Blob) {
         inputBuffer = await heicInput.arrayBuffer();
       } else if (heicInput instanceof ArrayBuffer) {
         inputBuffer = heicInput;
       } else {
-        throw new Error('Invalid input type. Expected File, Blob, or ArrayBuffer');
+        throw new Error(
+          'Invalid input type. Expected File, Blob, or ArrayBuffer'
+        );
       }
 
       // Convert using heic-to library
       const result = await heicTo({
         buffer: inputBuffer,
         type: 'image/jpeg',
-        quality: quality / 100
+        quality: quality / 100,
       });
 
       // Return as blob
@@ -47,19 +49,21 @@ class SimpleHeicConverter {
   static async convertToPNG(heicInput) {
     try {
       let inputBuffer;
-      
+
       if (heicInput instanceof File || heicInput instanceof Blob) {
         inputBuffer = await heicInput.arrayBuffer();
       } else if (heicInput instanceof ArrayBuffer) {
         inputBuffer = heicInput;
       } else {
-        throw new Error('Invalid input type. Expected File, Blob, or ArrayBuffer');
+        throw new Error(
+          'Invalid input type. Expected File, Blob, or ArrayBuffer'
+        );
       }
 
       // Convert using heic-to library
       const result = await heicTo({
         buffer: inputBuffer,
-        type: 'image/png'
+        type: 'image/png',
       });
 
       // Return as blob
@@ -78,19 +82,21 @@ class SimpleHeicConverter {
   static async getMetadata(heicInput) {
     try {
       let inputBuffer;
-      
+
       if (heicInput instanceof File || heicInput instanceof Blob) {
         inputBuffer = await heicInput.arrayBuffer();
       } else if (heicInput instanceof ArrayBuffer) {
         inputBuffer = heicInput;
       } else {
-        throw new Error('Invalid input type. Expected File, Blob, or ArrayBuffer');
+        throw new Error(
+          'Invalid input type. Expected File, Blob, or ArrayBuffer'
+        );
       }
 
       // For basic metadata, we can decode as PNG and get canvas dimensions
       const result = await heicTo({
         buffer: inputBuffer,
-        type: 'image/png'
+        type: 'image/png',
       });
 
       // Create temporary image to get dimensions
@@ -101,11 +107,11 @@ class SimpleHeicConverter {
             width: img.width,
             height: img.height,
             format: 'HEIC',
-            size: inputBuffer.byteLength
+            size: inputBuffer.byteLength,
           });
         };
         img.onerror = () => reject(new Error('Failed to get image dimensions'));
-        
+
         const blob = new Blob([result], { type: 'image/png' });
         img.src = URL.createObjectURL(blob);
       });
@@ -123,7 +129,7 @@ class SimpleHeicConverter {
   static async isHEIC(input) {
     try {
       let buffer;
-      
+
       if (input instanceof File || input instanceof Blob) {
         buffer = await input.arrayBuffer();
       } else if (input instanceof ArrayBuffer) {
@@ -135,19 +141,19 @@ class SimpleHeicConverter {
       }
 
       const uint8Array = new Uint8Array(buffer);
-      
+
       // Check for HEIC/HEIF file signature
       if (uint8Array.length < 12) return false;
-      
+
       const ftyp = String.fromCharCode(
         uint8Array[4],
         uint8Array[5],
         uint8Array[6],
         uint8Array[7]
       );
-      
+
       if (ftyp !== 'ftyp') return false;
-      
+
       // Check for HEIC/HEIF brand
       const brand = String.fromCharCode(
         uint8Array[8],
@@ -155,8 +161,18 @@ class SimpleHeicConverter {
         uint8Array[10],
         uint8Array[11]
       );
-      
-      const heicBrands = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs', 'mif1'];
+
+      const heicBrands = [
+        'heic',
+        'heix',
+        'hevc',
+        'hevx',
+        'heim',
+        'heis',
+        'hevm',
+        'hevs',
+        'mif1',
+      ];
       return heicBrands.includes(brand);
     } catch (error) {
       console.error('Error checking HEIC format:', error);
@@ -173,10 +189,10 @@ class SimpleHeicConverter {
    */
   static async convertBatch(heicFiles, outputFormat = 'jpeg', quality = 90) {
     const results = [];
-    
+
     for (let i = 0; i < heicFiles.length; i++) {
       const file = heicFiles[i];
-      
+
       try {
         let result;
         if (outputFormat.toLowerCase() === 'png') {
@@ -187,10 +203,12 @@ class SimpleHeicConverter {
         results.push(result);
       } catch (error) {
         console.error(`Failed to convert file ${i + 1}:`, error);
-        throw new Error(`Batch conversion failed at file ${i + 1}: ${error.message}`);
+        throw new Error(
+          `Batch conversion failed at file ${i + 1}: ${error.message}`
+        );
       }
     }
-    
+
     return results;
   }
 }
