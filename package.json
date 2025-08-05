@@ -34,6 +34,8 @@
     "typescript-eslint": "^8.38.0"
   },
   "dependencies": {
+    "heic-to": "^1.2.1",
+    "libheif-js": "^1.19.8",
     "next": "^15.4.5",
     "react-dom": "^19.1.1",
     "zustand": "^5.0.7"

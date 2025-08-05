@@ -1,0 +1,30 @@
+# Emscripten SDK
+emsdk/
+
+# Build directories
+build/
+dist/
+
+# Downloaded source files
+*.tar.gz
+*.tar.xz
+*.zip
+
+# Compiled files
+*.wasm
+*.js.mem
+*.data
+*.asm.js
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if used for build tools)
+node_modules/
+
