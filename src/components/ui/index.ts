@@ -11,4 +11,9 @@ export {
   type CardContentProps,
   type CardFooterProps,
 } from './Card';
-export { Progress, CircularProgress, type ProgressProps, type CircularProgressProps } from './Progress';
+export {
+  Progress,
+  CircularProgress,
+  type ProgressProps,
+  type CircularProgressProps,
+} from './Progress';

@@ -14,7 +14,9 @@ export const Header: React.FC<HeaderProps> = ({
   children,
 }) => {
   return (
-    <header className={`bg-white shadow-sm border-b border-gray-200 ${className}`}>
+    <header
+      className={`bg-white shadow-sm border-b border-gray-200 ${className}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4 md:py-6">
           <div className="flex items-center">
@@ -38,17 +40,13 @@ export const Header: React.FC<HeaderProps> = ({
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-sm text-gray-600 mt-0.5">
-                  {subtitle}
-                </p>
+                <p className="text-sm text-gray-600 mt-0.5">{subtitle}</p>
               )}
             </div>
           </div>
-          
+
           {children && (
-            <div className="flex items-center space-x-4">
-              {children}
-            </div>
+            <div className="flex items-center space-x-4">{children}</div>
           )}
         </div>
       </div>
@@ -78,7 +76,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div className="flex space-x-8">
           {items.map((item, index) => {
             const Component = item.href ? 'a' : 'button';
-            
+
             return (
               <Component
                 key={index}
@@ -86,9 +84,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                 onClick={item.onClick}
                 className={`
                   inline-flex items-center px-1 pt-1 pb-3 text-sm font-medium border-b-2 transition-colors
-                  ${item.isActive
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ${
+                    item.isActive
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >

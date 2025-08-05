@@ -37,7 +37,7 @@ export const useConversion = () => {
         try {
           // Simulate conversion process
           const result = await convertSingleFile(file);
-          
+
           updateFileStatus(file.id, 'completed');
           updateProgress(file.id, {
             percentage: 100,
@@ -60,12 +60,21 @@ export const useConversion = () => {
     }
 
     return results;
-  }, [files, isConverting, settings, setIsConverting, updateFileStatus, updateProgress]);
+  }, [
+    files,
+    isConverting,
+    settings,
+    setIsConverting,
+    updateFileStatus,
+    updateProgress,
+  ]);
 
-  const convertSingleFile = async (file: ConversionFile): Promise<ConversionResult> => {
+  const convertSingleFile = async (
+    file: ConversionFile
+  ): Promise<ConversionResult> => {
     // This is a placeholder for the actual conversion logic
     // In a real implementation, this would use a library like heic2any or a server-side API
-    
+
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Mock conversion - in reality, you'd use HEIC conversion libraries
@@ -73,34 +82,38 @@ export const useConversion = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           const img = new Image();
-          
+
           img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
-            
+
             if (ctx) {
               ctx.drawImage(img, 0, 0);
-              canvas.toBlob((blob) => {
-                if (blob) {
-                  const downloadUrl = URL.createObjectURL(blob);
-                  const fileName = `${file.name.replace(/\.[^/.]+$/, '')}.${settings.outputFormat}`;
-                  
-                  resolve({
-                    id: file.id,
-                    originalFile: file,
-                    convertedBlob: blob,
-                    downloadUrl,
-                    fileName,
-                  });
-                } else {
-                  reject(new Error('Failed to create blob'));
-                }
-              }, `image/${settings.outputFormat}`, settings.quality / 100);
+              canvas.toBlob(
+                (blob) => {
+                  if (blob) {
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const fileName = `${file.name.replace(/\.[^/.]+$/, '')}.${settings.outputFormat}`;
+
+                    resolve({
+                      id: file.id,
+                      originalFile: file,
+                      convertedBlob: blob,
+                      downloadUrl,
+                      fileName,
+                    });
+                  } else {
+                    reject(new Error('Failed to create blob'));
+                  }
+                },
+                `image/${settings.outputFormat}`,
+                settings.quality / 100
+              );
             } else {
               reject(new Error('Failed to get canvas context'));
             }
           };
-          
+
           img.onerror = () => reject(new Error('Failed to load image'));
           img.src = URL.createObjectURL(file.file);
         } catch (error) {
@@ -130,7 +143,7 @@ export const useConversion = () => {
     progress,
     settings,
     isConverting,
-    
+
     // Actions
     addFiles,
     removeFile,
@@ -139,11 +152,11 @@ export const useConversion = () => {
     convertFiles,
     downloadFile,
     downloadAll,
-    
+
     // Computed
     hasFiles: files.length > 0,
-    completedFiles: files.filter(f => f.status === 'completed'),
-    pendingFiles: files.filter(f => f.status === 'pending'),
-    errorFiles: files.filter(f => f.status === 'error'),
+    completedFiles: files.filter((f) => f.status === 'completed'),
+    pendingFiles: files.filter((f) => f.status === 'pending'),
+    errorFiles: files.filter((f) => f.status === 'error'),
   };
 };

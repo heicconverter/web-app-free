@@ -1,23 +1,29 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useErrorHandler, UseErrorHandlerReturn, useGlobalErrorHandler } from '../../hooks/useErrorHandler';
+import {
+  useErrorHandler,
+  UseErrorHandlerReturn,
+  useGlobalErrorHandler,
+} from '../../hooks/useErrorHandler';
 
 interface ErrorProviderContextType extends UseErrorHandlerReturn {
   isErrorHandlingEnabled: boolean;
 }
 
-const ErrorProviderContext = createContext<ErrorProviderContextType | null>(null);
+const ErrorProviderContext = createContext<ErrorProviderContextType | null>(
+  null
+);
 
 interface ErrorProviderProps {
   children: ReactNode;
   enableGlobalHandling?: boolean;
 }
 
-export function ErrorProvider({ 
-  children, 
-  enableGlobalHandling = true 
+export function ErrorProvider({
+  children,
+  enableGlobalHandling = true,
 }: ErrorProviderProps) {
   const errorHandler = useErrorHandler();
-  
+
   if (enableGlobalHandling) {
     useGlobalErrorHandler();
   }
@@ -36,11 +42,11 @@ export function ErrorProvider({
 
 export function useErrorContext(): ErrorProviderContextType {
   const context = useContext(ErrorProviderContext);
-  
+
   if (!context) {
     throw new Error('useErrorContext must be used within an ErrorProvider');
   }
-  
+
   return context;
 }
 

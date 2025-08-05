@@ -65,11 +65,9 @@ export const Footer: React.FC<FooterProps> = ({
             ))}
           </div>
         )}
-        
+
         <div className="border-t border-gray-200 pt-8">
-          <p className="text-sm text-gray-500 text-center">
-            {copyright}
-          </p>
+          <p className="text-sm text-gray-500 text-center">{copyright}</p>
         </div>
       </div>
     </footer>
@@ -91,10 +89,8 @@ export const SimpleFooter: React.FC<SimpleFooterProps> = ({
     <footer className={`bg-white border-t border-gray-200 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-          <p className="text-sm text-gray-500">
-            {text}
-          </p>
-          
+          <p className="text-sm text-gray-500">{text}</p>
+
           {links.length > 0 && (
             <nav className="flex space-x-6">
               {links.map((link, index) => (

@@ -17,31 +17,35 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (previewUrl) {
       setThumbnailUrl(previewUrl);
       setIsLoading(false);
       return;
     }
-    
+
     // For HEIC files, we can't generate a preview directly in the browser
     // This would typically be handled by the conversion service
-    if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.match(/\.(heic|heif)$/i)) {
+    if (
+      file.type === 'image/heic' ||
+      file.type === 'image/heif' ||
+      file.name.match(/\.(heic|heif)$/i)
+    ) {
       setIsLoading(false);
       setError('HEIC preview requires conversion');
       return;
     }
-    
+
     // For other image types, create a preview
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
-      
+
       reader.onload = (e) => {
         setThumbnailUrl(e.target?.result as string);
         setIsLoading(false);
       };
-      
+
       reader.onerror = () => {
         setError('Failed to load preview');
         setIsLoading(false);
@@ -49,21 +53,21 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
           onError(new Error('Failed to load file preview'));
         }
       };
-      
+
       reader.readAsDataURL(file);
-      
+
       return () => {
         reader.abort();
       };
     }
   }, [file, previewUrl, onError]);
-  
+
   const formatFileInfo = () => {
     const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
     const extension = file.name.split('.').pop()?.toUpperCase() || 'Unknown';
     return `${extension} • ${sizeInMB} MB`;
   };
-  
+
   return (
     <Card className={className} variant="bordered">
       <CardContent className="p-4">
@@ -91,7 +95,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
               </svg>
             </div>
           )}
-          
+
           {!isLoading && thumbnailUrl && (
             <img
               src={thumbnailUrl}
@@ -99,7 +103,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
               className="w-full h-full object-contain"
             />
           )}
-          
+
           {!isLoading && !thumbnailUrl && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -123,14 +127,15 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="mt-3">
-          <h4 className="text-sm font-medium text-gray-900 truncate" title={file.name}>
+          <h4
+            className="text-sm font-medium text-gray-900 truncate"
+            title={file.name}
+          >
             {file.name}
           </h4>
-          <p className="text-xs text-gray-500 mt-1">
-            {formatFileInfo()}
-          </p>
+          <p className="text-xs text-gray-500 mt-1">{formatFileInfo()}</p>
         </div>
       </CardContent>
     </Card>
@@ -152,7 +157,9 @@ export const FilePreviewGrid: React.FC<FilePreviewGridProps> = ({
   onError,
 }) => {
   return (
-    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ${className}`}>
+    <div
+      className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ${className}`}
+    >
       {files.map((item, index) => (
         <FilePreview
           key={`${item.file.name}-${index}`}

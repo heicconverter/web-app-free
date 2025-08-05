@@ -2,12 +2,12 @@ export function formatFileSize(bytes: number): string {
   const units = ['B', 'KB', 'MB', 'GB'];
   let size = bytes;
   let unitIndex = 0;
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-  
+
   return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
@@ -28,7 +28,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   // Clean up the URL object
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
@@ -48,11 +48,11 @@ export function dataURLToBlob(dataURL: string): Blob {
   const bstr = atob(parts[1]);
   const n = bstr.length;
   const u8arr = new Uint8Array(n);
-  
+
   for (let i = 0; i < n; i++) {
     u8arr[i] = bstr.charCodeAt(i);
   }
-  
+
   return new Blob([u8arr], { type: mime });
 }
 
@@ -61,7 +61,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -73,7 +73,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -83,15 +83,19 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   };
 }
 
-export function classNames(...classes: (string | undefined | null | false)[]): string {
+export function classNames(
+  ...classes: (string | undefined | null | false)[]
+): string {
   return classes.filter(Boolean).join(' ');
 }
 
 export function isHeicFile(file: File): boolean {
   const extension = getFileExtension(file.name);
-  return ['heic', 'heif'].includes(extension) || 
-         file.type === 'image/heic' || 
-         file.type === 'image/heif';
+  return (
+    ['heic', 'heif'].includes(extension) ||
+    file.type === 'image/heic' ||
+    file.type === 'image/heif'
+  );
 }
 
 export * from '../logger';

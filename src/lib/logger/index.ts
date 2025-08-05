@@ -18,7 +18,11 @@ class LoggerService {
     return levels[level] <= levels[this.config.level];
   }
 
-  private createLogEntry(level: LogLevel, message: string, meta?: Record<string, unknown>): LogEntry {
+  private createLogEntry(
+    level: LogLevel,
+    message: string,
+    meta?: Record<string, unknown>
+  ): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
@@ -29,14 +33,21 @@ class LoggerService {
 
   private writeLog(entry: LogEntry): void {
     this.logs.push(entry);
-    
+
     if (typeof window !== 'undefined') {
-      const consoleMethod = entry.level === 'error' ? console.error :
-                           entry.level === 'warn' ? console.warn :
-                           entry.level === 'debug' ? console.debug :
-                           console.log;
-      
-      consoleMethod(`[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`, entry.meta || '');
+      const consoleMethod =
+        entry.level === 'error'
+          ? console.error
+          : entry.level === 'warn'
+            ? console.warn
+            : entry.level === 'debug'
+              ? console.debug
+              : console.log;
+
+      consoleMethod(
+        `[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`,
+        entry.meta || ''
+      );
     }
   }
 

@@ -26,7 +26,7 @@ export class DatabaseConnectionPool {
       // In a real implementation, you would initialize your database client here
       // For example, with PostgreSQL:
       // this.pool = new Pool(this.config);
-      
+
       Logger.info('Database connection established', {
         host: this.config.host,
         database: this.config.database,
@@ -62,7 +62,7 @@ export class DatabaseConnectionPool {
 
     try {
       // Close all connections in the pool
-      await Promise.all(this.connections.map(conn => conn.close()));
+      await Promise.all(this.connections.map((conn) => conn.close()));
       this.connections = [];
       this.isConnected = false;
 
@@ -84,13 +84,18 @@ class MockDatabaseConnection implements DatabaseConnection {
     return [] as T[];
   }
 
-  async queryOne<T = unknown>(sql: string, params?: unknown[]): Promise<T | null> {
+  async queryOne<T = unknown>(
+    sql: string,
+    params?: unknown[]
+  ): Promise<T | null> {
     Logger.debug('Database query (single) executed', { sql, params });
     // In a real implementation, execute the query and return single result
     return null;
   }
 
-  async transaction<T>(callback: (trx: DatabaseConnection) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    callback: (trx: DatabaseConnection) => Promise<T>
+  ): Promise<T> {
     Logger.debug('Database transaction started');
     try {
       // In a real implementation, start a transaction
@@ -113,7 +118,9 @@ class MockDatabaseConnection implements DatabaseConnection {
 // Global database instance
 let dbInstance: DatabaseConnectionPool | null = null;
 
-export function initializeDatabase(config: DatabaseConfig): DatabaseConnectionPool {
+export function initializeDatabase(
+  config: DatabaseConfig
+): DatabaseConnectionPool {
   if (dbInstance) {
     return dbInstance;
   }
@@ -124,7 +131,9 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseConnectionPo
 
 export function getDatabase(): DatabaseConnectionPool {
   if (!dbInstance) {
-    throw new Error('Database not initialized. Call initializeDatabase() first.');
+    throw new Error(
+      'Database not initialized. Call initializeDatabase() first.'
+    );
   }
   return dbInstance;
 }

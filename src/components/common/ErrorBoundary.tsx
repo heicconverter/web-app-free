@@ -13,14 +13,21 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: ReactNode;
-  fallback?: (error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode;
+  fallback?: (
+    error: Error,
+    errorInfo: ErrorInfo,
+    reset: () => void
+  ) => ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   context?: ErrorContext;
   isolate?: boolean;
   maxRetries?: number;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   private retryTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(props: ErrorBoundaryProps) {
@@ -56,7 +63,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       isolated: this.props.isolate || false,
     };
 
-    Logger.error('ErrorBoundary caught an error', { 
+    Logger.error('ErrorBoundary caught an error', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -69,7 +76,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       } catch (handlerError) {
         Logger.error('Error in ErrorBoundary onError handler', {
           originalError: error.message,
-          handlerError: handlerError instanceof Error ? handlerError.message : String(handlerError),
+          handlerError:
+            handlerError instanceof Error
+              ? handlerError.message
+              : String(handlerError),
         });
       }
     }
@@ -103,12 +113,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     ];
 
     const errorMessage = error.message.toLowerCase();
-    return transientErrors.some(msg => errorMessage.includes(msg));
+    return transientErrors.some((msg) => errorMessage.includes(msg));
   }
 
   private scheduleAutoRetry(): void {
     const delay = Math.min(1000 * Math.pow(2, this.state.retryCount), 10000);
-    
+
     Logger.info(`Scheduling auto-retry in ${delay}ms`, {
       errorId: this.state.errorId,
       retryCount: this.state.retryCount,
@@ -126,7 +136,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     const newRetryCount = this.state.hasError ? this.state.retryCount + 1 : 0;
-    
+
     this.setState({
       hasError: false,
       error: null,
@@ -157,15 +167,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <CardContent>
               <div className="space-y-4">
                 <p className="text-gray-600">
-                  An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+                  An unexpected error occurred. Please try refreshing the page
+                  or contact support if the problem persists.
                 </p>
-                
+
                 {this.state.retryCount > 0 && (
                   <p className="text-sm text-orange-600 mt-2">
-                    Retry attempt {this.state.retryCount} of {this.props.maxRetries ?? 3}
+                    Retry attempt {this.state.retryCount} of{' '}
+                    {this.props.maxRetries ?? 3}
                   </p>
                 )}
-                
+
                 {process.env.NODE_ENV === 'development' && (
                   <details className="mt-4">
                     <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
@@ -181,7 +193,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                         </pre>
                       )}
                       <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto max-h-48">
-                        <strong>Component Stack:</strong> {this.state.errorInfo.componentStack}
+                        <strong>Component Stack:</strong>{' '}
+                        {this.state.errorInfo.componentStack}
                       </pre>
                       {this.state.errorId && (
                         <p className="text-xs text-gray-500">
@@ -191,7 +204,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                     </div>
                   </details>
                 )}
-                
+
                 <div className="flex space-x-3">
                   <Button
                     variant="primary"
@@ -199,10 +212,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   >
                     Refresh page
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={this.handleReset}
-                  >
+                  <Button variant="outline" onClick={this.handleReset}>
                     Try again
                   </Button>
                 </div>
@@ -256,11 +266,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
                 {error.message || 'An unexpected error occurred'}
               </p>
               <div className="mt-4">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={resetError}
-                >
+                <Button size="sm" variant="outline" onClick={resetError}>
                   Try again
                 </Button>
               </div>

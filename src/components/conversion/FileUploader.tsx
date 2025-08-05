@@ -17,65 +17,75 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const validateFiles = (files: File[]): File[] => {
     setError(null);
     const validFiles: File[] = [];
-    
+
     for (const file of files) {
       const extension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-      
-      if (!acceptedFormats.some(format => extension === format.toLowerCase())) {
-        setError(`Invalid file format. Accepted formats: ${acceptedFormats.join(', ')}`);
+
+      if (
+        !acceptedFormats.some((format) => extension === format.toLowerCase())
+      ) {
+        setError(
+          `Invalid file format. Accepted formats: ${acceptedFormats.join(', ')}`
+        );
         continue;
       }
-      
+
       if (file.size > maxFileSize) {
         setError(`File size exceeds ${maxFileSize / (1024 * 1024)}MB limit`);
         continue;
       }
-      
+
       validFiles.push(file);
     }
-    
+
     return validFiles;
   };
-  
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   }, []);
-  
+
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   }, []);
-  
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    const validFiles = validateFiles(files);
-    
-    if (validFiles.length > 0) {
-      onFilesSelected(validFiles);
-    }
-  }, [onFilesSelected, maxFileSize, acceptedFormats]);
-  
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    
-    const files = Array.from(e.target.files);
-    const validFiles = validateFiles(files);
-    
-    if (validFiles.length > 0) {
-      onFilesSelected(validFiles);
-    }
-  }, [onFilesSelected, maxFileSize, acceptedFormats]);
-  
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      const validFiles = validateFiles(files);
+
+      if (validFiles.length > 0) {
+        onFilesSelected(validFiles);
+      }
+    },
+    [onFilesSelected, maxFileSize, acceptedFormats]
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files) return;
+
+      const files = Array.from(e.target.files);
+      const validFiles = validateFiles(files);
+
+      if (validFiles.length > 0) {
+        onFilesSelected(validFiles);
+      }
+    },
+    [onFilesSelected, maxFileSize, acceptedFormats]
+  );
+
   const inputId = `file-upload-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return (
     <div className={className}>
       <div
@@ -84,9 +94,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         onDrop={handleDrop}
         className={`
           relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-          ${isDragOver 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-gray-400'
+          ${
+            isDragOver
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-300 hover:border-gray-400'
           }
         `}
       >
@@ -98,7 +109,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           onChange={handleFileSelect}
           className="hidden"
         />
-        
+
         <svg
           className="mx-auto h-12 w-12 text-gray-400"
           stroke="currentColor"
@@ -113,28 +124,22 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             strokeLinejoin="round"
           />
         </svg>
-        
+
         <div className="mt-4">
           <label htmlFor={inputId} className="cursor-pointer">
             <span className="inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-base">
               Select files
             </span>
           </label>
-          <p className="mt-2 text-sm text-gray-600">
-            or drag and drop
-          </p>
+          <p className="mt-2 text-sm text-gray-600">or drag and drop</p>
         </div>
-        
+
         <p className="mt-2 text-xs text-gray-500">
           {acceptedFormats.join(', ')} up to {maxFileSize / (1024 * 1024)}MB
         </p>
       </div>
-      
-      {error && (
-        <div className="mt-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+
+      {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
     </div>
   );
 };

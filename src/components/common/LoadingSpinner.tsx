@@ -17,14 +17,14 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     lg: 'h-12 w-12',
     xl: 'h-16 w-16',
   };
-  
+
   const colorStyles = {
     primary: 'text-blue-600',
     secondary: 'text-gray-600',
     white: 'text-white',
     gray: 'text-gray-400',
   };
-  
+
   return (
     <svg
       className={`animate-spin ${sizeStyles[size]} ${colorStyles[color]} ${className}`}
@@ -63,20 +63,16 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   children,
 }) => {
   if (!isLoading) return <>{children}</>;
-  
+
   return (
     <div className={`relative ${className}`}>
       {children && (
-        <div className="opacity-50 pointer-events-none">
-          {children}
-        </div>
+        <div className="opacity-50 pointer-events-none">{children}</div>
       )}
       <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          {message && (
-            <p className="mt-4 text-sm text-gray-600">{message}</p>
-          )}
+          {message && <p className="mt-4 text-sm text-gray-600">{message}</p>}
         </div>
       </div>
     </div>
@@ -103,17 +99,18 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     circular: 'rounded-full',
     rectangular: 'rounded-md',
   };
-  
+
   const animationStyles = {
     pulse: 'animate-pulse',
     wave: 'animate-shimmer',
     none: '',
   };
-  
+
   const style: React.CSSProperties = {};
   if (width) style.width = typeof width === 'number' ? `${width}px` : width;
-  if (height) style.height = typeof height === 'number' ? `${height}px` : height;
-  
+  if (height)
+    style.height = typeof height === 'number' ? `${height}px` : height;
+
   // Default dimensions based on variant
   if (!height) {
     if (variant === 'text') style.height = '1rem';
@@ -123,7 +120,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     }
     if (variant === 'rectangular') style.height = '120px';
   }
-  
+
   return (
     <div
       className={`bg-gray-200 ${variantStyles[variant]} ${animationStyles[animation]} ${className}`}
@@ -142,7 +139,9 @@ export const PageLoader: React.FC<PageLoaderProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`min-h-screen flex items-center justify-center ${className}`}>
+    <div
+      className={`min-h-screen flex items-center justify-center ${className}`}
+    >
       <div className="text-center">
         <LoadingSpinner size="xl" />
         <p className="mt-4 text-lg text-gray-600">{message}</p>

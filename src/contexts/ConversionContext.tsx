@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { ConversionFile, ConversionProgress, ConversionSettings } from '../types/conversion';
+import {
+  ConversionFile,
+  ConversionProgress,
+  ConversionSettings,
+} from '../types/conversion';
 
 type ConversionContextType = {
   files: ConversionFile[];
@@ -12,11 +16,15 @@ type ConversionContextType = {
   updateSettings: (settings: Partial<ConversionSettings>) => void;
 };
 
-const ConversionContext = createContext<ConversionContextType | undefined>(undefined);
+const ConversionContext = createContext<ConversionContextType | undefined>(
+  undefined
+);
 
 export const ConversionProvider = ({ children }: { children: ReactNode }) => {
   const [files, setFiles] = useState<ConversionFile[]>([]);
-  const [progress, setProgress] = useState<Record<string, ConversionProgress>>({});
+  const [progress, setProgress] = useState<Record<string, ConversionProgress>>(
+    {}
+  );
   const [settings, setSettings] = useState<ConversionSettings>({
     outputFormat: 'jpg',
     quality: 80,
@@ -52,16 +60,18 @@ export const ConversionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <ConversionContext.Provider value={{
-      files,
-      progress,
-      settings,
-      addFiles,
-      removeFile,
-      clearQueue,
-      updateProgress,
-      updateSettings,
-    }}>
+    <ConversionContext.Provider
+      value={{
+        files,
+        progress,
+        settings,
+        addFiles,
+        removeFile,
+        clearQueue,
+        updateProgress,
+        updateSettings,
+      }}
+    >
       {children}
     </ConversionContext.Provider>
   );
@@ -70,7 +80,9 @@ export const ConversionProvider = ({ children }: { children: ReactNode }) => {
 export const useConversionContext = () => {
   const context = useContext(ConversionContext);
   if (context === undefined) {
-    throw new Error('useConversionContext must be used within a ConversionProvider');
+    throw new Error(
+      'useConversionContext must be used within a ConversionProvider'
+    );
   }
   return context;
 };

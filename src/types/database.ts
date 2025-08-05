@@ -8,7 +8,11 @@ export type BillingCycle = 'monthly' | 'yearly';
 export type PaymentProvider = 'stripe' | 'paypal';
 export type PaymentMethodType = 'card' | 'bank_account' | 'digital_wallet';
 export type PaymentStatus = 'succeeded' | 'failed' | 'pending' | 'cancelled';
-export type ConversionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type ConversionStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
 export type ErrorLevel = 'error' | 'warning' | 'info';
 export type ExportType = 'full' | 'partial' | 'specific';
 export type ExportStatus = 'pending' | 'processing' | 'completed' | 'failed';
