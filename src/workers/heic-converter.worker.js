@@ -1,6 +1,6 @@
 import SimpleHeicConverter from '../wasm/heic-to-wrapper.js';
 
-self.onmessage = async function(e) {
+self.onmessage = async function (e) {
   const { file, type, quality } = e.data;
   try {
     let result;
