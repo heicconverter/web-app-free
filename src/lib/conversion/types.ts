@@ -21,7 +21,7 @@ export interface ConversionResult {
 export interface ConversionError {
   code: 'UNSUPPORTED_FORMAT' | 'CONVERSION_FAILED' | 'FILE_TOO_LARGE' | 'INVALID_OPTIONS';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface ConversionProgress {

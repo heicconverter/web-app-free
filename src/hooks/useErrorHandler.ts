@@ -22,7 +22,7 @@ export interface UseErrorHandlerReturn {
     asyncFn: () => Promise<T>,
     options?: ErrorHandlerOptions
   ) => Promise<T | null>;
-  withErrorBoundary: <T extends (...args: any[]) => any>(
+  withErrorBoundary: <T extends (...args: unknown[]) => unknown>(
     fn: T,
     options?: ErrorHandlerOptions
   ) => T;
@@ -105,7 +105,7 @@ export function useErrorHandler(): UseErrorHandlerReturn {
     }
   }, [handleError]);
 
-  const withErrorBoundary = useCallback(<T extends (...args: any[]) => any>(
+  const withErrorBoundary = useCallback(<T extends (...args: unknown[]) => unknown>(
     fn: T,
     options: ErrorHandlerOptions = {}
   ): T => {

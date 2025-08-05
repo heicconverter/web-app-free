@@ -1,43 +1,14 @@
 import React from 'react';
 
-type PolymorphicRef<C extends React.ElementType> = React.ComponentPropsWithRef<C>['ref'];
-
-type AsProp<C extends React.ElementType> = {
-  as?: C;
-};
-
-type PropsToOmit<C extends React.ElementType, P> = keyof (AsProp<C> & P);
-
-type PolymorphicComponentProp<
-  C extends React.ElementType,
-  Props = {}
-> = React.PropsWithChildren<Props & AsProp<C>> & 
-  Omit<React.ComponentPropsWithoutRef<C>, PropsToOmit<C, Props>>;
-
-type PolymorphicComponentPropWithRef<
-  C extends React.ElementType,
-  Props = {}
-> = PolymorphicComponentProp<C, Props> & { ref?: PolymorphicRef<C> };
-
-type ButtonOwnProps = {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
-};
+}
 
-type ButtonProps<C extends React.ElementType = 'button'> = PolymorphicComponentPropWithRef<
-  C,
-  ButtonOwnProps
->;
-
-type ButtonComponent = <C extends React.ElementType = 'button'>(
-  props: ButtonProps<C>
-) => React.ReactElement | null;
-
-export const Button: ButtonComponent = React.forwardRef(
-  <C extends React.ElementType = 'button'>(
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
     {
-      as,
       variant = 'primary',
       size = 'md',
       isLoading = false,
@@ -45,10 +16,9 @@ export const Button: ButtonComponent = React.forwardRef(
       className = '',
       disabled,
       ...props
-    }: ButtonProps<C>,
-    ref?: PolymorphicRef<C>
+    },
+    ref
   ) => {
-    const Component = as || 'button';
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantStyles = {
@@ -65,9 +35,9 @@ export const Button: ButtonComponent = React.forwardRef(
   };
   
     const isDisabled = disabled || isLoading;
-    
+
     return (
-      <Component
+      <button
         ref={ref}
         className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
           isDisabled ? 'opacity-50 cursor-not-allowed' : ''
@@ -98,7 +68,9 @@ export const Button: ButtonComponent = React.forwardRef(
         </svg>
       )}
         {children}
-      </Component>
+      </button>
     );
   }
 );
+
+Button.displayName = 'Button';

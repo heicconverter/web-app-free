@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useConversionStore } from '../store';
-import { ConversionFile, ConversionProgress, ConversionResult } from '../types/conversion';
+import { ConversionFile, ConversionResult } from '../types/conversion';
 
 export const useConversion = () => {
   const {

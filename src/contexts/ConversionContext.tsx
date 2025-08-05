@@ -32,6 +32,7 @@ export const ConversionProvider = ({ children }: { children: ReactNode }) => {
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
     setProgress((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _, ...rest } = prev;
       return rest;
     });

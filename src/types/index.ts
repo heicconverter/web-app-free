@@ -41,13 +41,13 @@ export interface ConversionQueueItem {
   file: File;
   status: 'pending' | 'processing' | 'completed' | 'error';
   progress: number;
-  outputFormat: ImageFormat;
-  result?: ConversionResult;
-  error?: ConversionError;
+  outputFormat: import('../lib/conversion/types').ImageFormat;
+  result?: import('../lib/conversion/types').ConversionResult;
+  error?: import('../lib/conversion/types').ConversionError;
 }
 
 export interface AppSettings {
-  defaultOutputFormat: ImageFormat;
+  defaultOutputFormat: import('../lib/conversion/types').ImageFormat;
   defaultQuality: number;
   autoDownload: boolean;
   theme: 'light' | 'dark' | 'system';

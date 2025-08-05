@@ -1,2 +1,2 @@
-export { ConversionProvider, useConversion, type ConversionContextType } from './ConversionContext';
-export { ThemeProvider, useTheme, type ThemeContextType } from './ThemeContext';
+export { ConversionProvider, useConversionContext } from './ConversionContext';
+// export { ThemeProvider, useTheme, type ThemeContextType } from './ThemeContext'; // TODO: Create ThemeContext

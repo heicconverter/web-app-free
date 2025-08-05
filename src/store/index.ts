@@ -17,7 +17,7 @@ interface ConversionStore {
   updateFileStatus: (id: string, status: ConversionFile['status']) => void;
 }
 
-export const useConversionStore = create<ConversionStore>((set, get) => ({
+export const useConversionStore = create<ConversionStore>((set) => ({
   files: [],
   progress: {},
   settings: {
@@ -34,6 +34,7 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
   })),
 
   removeFile: (id) => set((state) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [id]: _, ...remainingProgress } = state.progress;
     return {
       files: state.files.filter((f) => f.id !== id),

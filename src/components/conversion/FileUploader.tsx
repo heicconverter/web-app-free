@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react';
-import { Button } from '../ui';
 
 export interface FileUploaderProps {
   onFilesSelected: (files: File[]) => void;
@@ -116,15 +115,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         </svg>
         
         <div className="mt-4">
-          <label htmlFor={inputId}>
-            <Button
-              as="span"
-              variant="primary"
-              size="md"
-              className="cursor-pointer"
-            >
+          <label htmlFor={inputId} className="cursor-pointer">
+            <span className="inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-base">
               Select files
-            </Button>
+            </span>
           </label>
           <p className="mt-2 text-sm text-gray-600">
             or drag and drop

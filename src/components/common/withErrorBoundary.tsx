@@ -25,7 +25,7 @@ export function withErrorBoundary<P extends object>(
 
     return (
       <ErrorBoundary
-        fallback={fallback ? (error, errorInfo, reset) => fallback(error, reset) : undefined}
+        fallback={fallback ? (error, _errorInfo, reset) => fallback(error, reset) : undefined}
         onError={onError}
         context={context}
         isolate={isolate}
