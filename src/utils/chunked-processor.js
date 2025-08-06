@@ -27,7 +27,7 @@ class ChunkedProcessor {
     const {
       onProgress = () => {},
       onChunkComplete = () => {},
-      onError = (error, item) =>
+      onError = (error) =>
         console.error('Processing error:', error),
       stopOnError = false,
       preserveOrder = true,
