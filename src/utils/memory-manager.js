@@ -24,12 +24,13 @@ class MemoryManager {
       // Use 70% of JS heap size limit for safety
       return Math.floor(performance.memory.jsHeapSizeLimit * 0.7);
     }
-    
+
     // Fallback: Use conservative estimate based on device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-    
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
     // Mobile: 256MB, Desktop: 1GB
     return isMobile ? 256 * 1024 * 1024 : 1024 * 1024 * 1024;
   }
@@ -53,11 +54,11 @@ class MemoryManager {
   hasAvailableMemory(requiredMemory) {
     const currentUsage = this.getCurrentMemoryUsage();
     const projected = currentUsage + requiredMemory;
-    
+
     if (projected > this.maxMemoryUsage * this.gcThreshold) {
       this.triggerCleanup();
     }
-    
+
     return projected < this.maxMemoryUsage;
   }
 
@@ -68,7 +69,7 @@ class MemoryManager {
    */
   estimateMemoryRequirement(file) {
     let fileSize;
-    
+
     if (file instanceof File || file instanceof Blob) {
       fileSize = file.size;
     } else if (file instanceof ArrayBuffer) {
@@ -76,7 +77,7 @@ class MemoryManager {
     } else {
       fileSize = 0;
     }
-    
+
     // Estimate: original + decoded (4x for RGBA) + output (0.5x for JPEG)
     // Total: ~5.5x original file size
     return Math.ceil(fileSize * 5.5);
@@ -132,15 +133,15 @@ class MemoryManager {
    */
   cleanup() {
     // Revoke all object URLs
-    this.objectURLs.forEach(url => {
+    this.objectURLs.forEach((url) => {
       URL.revokeObjectURL(url);
     });
     this.objectURLs.clear();
-    
+
     // Clear blob references
     this.activeBlobs.clear();
     this.currentMemoryEstimate = 0;
-    
+
     // Request garbage collection if available
     this.requestGarbageCollection();
   }
@@ -150,33 +151,33 @@ class MemoryManager {
    */
   triggerCleanup() {
     console.log('Memory threshold reached, triggering cleanup...');
-    
+
     // Clean up old blobs
     const blobsToRemove = [];
     const keepCount = Math.floor(this.activeBlobs.size * 0.3); // Keep 30% newest
     let count = 0;
-    
+
     for (const blob of this.activeBlobs) {
       if (count >= keepCount) {
         blobsToRemove.push(blob);
       }
       count++;
     }
-    
-    blobsToRemove.forEach(blob => this.unregisterBlob(blob));
-    
+
+    blobsToRemove.forEach((blob) => this.unregisterBlob(blob));
+
     // Clean up orphaned object URLs
     const urlsToRevoke = [];
-    this.objectURLs.forEach(url => {
+    this.objectURLs.forEach((url) => {
       // Check if URL is still in use
       const img = document.querySelector(`img[src="${url}"]`);
       if (!img) {
         urlsToRevoke.push(url);
       }
     });
-    
-    urlsToRevoke.forEach(url => this.revokeObjectURL(url));
-    
+
+    urlsToRevoke.forEach((url) => this.revokeObjectURL(url));
+
     // Request garbage collection
     this.requestGarbageCollection();
   }
@@ -204,9 +205,9 @@ class MemoryManager {
         task: conversionTask,
         estimatedMemory,
         resolve,
-        reject
+        reject,
       });
-      
+
       if (!this.isProcessing) {
         this.processQueue();
       }
@@ -221,16 +222,16 @@ class MemoryManager {
       this.isProcessing = false;
       return;
     }
-    
+
     this.isProcessing = true;
     const item = this.conversionQueue[0];
-    
+
     // Wait for memory if needed
     while (!this.hasAvailableMemory(item.estimatedMemory)) {
       await this.delay(100);
       this.triggerCleanup();
     }
-    
+
     try {
       // Process conversion
       const result = await item.task();
@@ -239,7 +240,7 @@ class MemoryManager {
       item.reject(error);
     } finally {
       this.conversionQueue.shift();
-      
+
       // Continue processing queue
       if (this.conversionQueue.length > 0) {
         // Small delay to allow UI updates
@@ -257,7 +258,7 @@ class MemoryManager {
    * @returns {Promise} - Promise that resolves after delay
    */
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -268,7 +269,7 @@ class MemoryManager {
     const current = this.getCurrentMemoryUsage();
     const max = this.maxMemoryUsage;
     const percentage = (current / max) * 100;
-    
+
     return {
       current,
       max,
@@ -277,7 +278,7 @@ class MemoryManager {
       activeBlobCount: this.activeBlobs.size,
       activeURLCount: this.objectURLs.size,
       queueLength: this.conversionQueue.length,
-      isHealthy: percentage < this.gcThreshold * 100
+      isHealthy: percentage < this.gcThreshold * 100,
     };
   }
 
@@ -287,7 +288,7 @@ class MemoryManager {
   startMonitoring(interval = 5000) {
     this.monitoringInterval = setInterval(() => {
       const status = this.getMemoryStatus();
-      
+
       if (status.percentage > 90) {
         console.warn('Critical memory usage:', status);
         this.triggerCleanup();

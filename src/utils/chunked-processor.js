@@ -27,9 +27,10 @@ class ChunkedProcessor {
     const {
       onProgress = () => {},
       onChunkComplete = () => {},
-      onError = (error, item, index) => console.error('Processing error:', error),
+      onError = (error, item, index) =>
+        console.error('Processing error:', error),
       stopOnError = false,
-      preserveOrder = true
+      preserveOrder = true,
     } = options;
 
     const results = preserveOrder ? new Array(items.length) : [];
@@ -38,10 +39,10 @@ class ChunkedProcessor {
 
     // Create chunks
     const chunks = this.createChunks(items);
-    
+
     for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
       const chunk = chunks[chunkIndex];
-      
+
       // Process chunk with concurrency control
       const chunkResults = await this.processChunk(
         chunk,
@@ -50,11 +51,15 @@ class ChunkedProcessor {
         {
           onItemComplete: (result, error, originalIndex) => {
             completed++;
-            
+
             if (error) {
-              errors.push({ error, index: originalIndex, item: items[originalIndex] });
+              errors.push({
+                error,
+                index: originalIndex,
+                item: items[originalIndex],
+              });
               onError(error, items[originalIndex], originalIndex);
-              
+
               if (stopOnError) {
                 throw error;
               }
@@ -63,7 +68,7 @@ class ChunkedProcessor {
             } else {
               results.push(result);
             }
-            
+
             // Report progress
             onProgress({
               completed,
@@ -71,9 +76,9 @@ class ChunkedProcessor {
               percentage: (completed / items.length) * 100,
               errors: errors.length,
               currentChunk: chunkIndex + 1,
-              totalChunks: chunks.length
+              totalChunks: chunks.length,
             });
-          }
+          },
         }
       );
 
@@ -83,7 +88,7 @@ class ChunkedProcessor {
         totalChunks: chunks.length,
         chunkResults,
         completed,
-        total: items.length
+        total: items.length,
       });
 
       // Delay between chunks to prevent UI blocking
@@ -93,10 +98,10 @@ class ChunkedProcessor {
     }
 
     return {
-      results: preserveOrder ? results.filter(r => r !== undefined) : results,
+      results: preserveOrder ? results.filter((r) => r !== undefined) : results,
       errors,
       completed,
-      total: items.length
+      total: items.length,
     };
   }
 
@@ -135,11 +140,11 @@ class ChunkedProcessor {
       }
 
       const promise = this.processItem(item, processor, originalIndex)
-        .then(result => {
+        .then((result) => {
           onItemComplete(result, null, originalIndex);
           return result;
         })
-        .catch(error => {
+        .catch((error) => {
           onItemComplete(null, error, originalIndex);
           return { error, index: originalIndex };
         });
@@ -163,7 +168,7 @@ class ChunkedProcessor {
     try {
       // Check memory before processing
       const memoryRequired = this.estimateItemMemory(item);
-      
+
       if (!this.memoryManager.hasAvailableMemory(memoryRequired)) {
         // Wait for memory to be available
         await this.waitForMemory(memoryRequired);
@@ -171,7 +176,7 @@ class ChunkedProcessor {
 
       // Process the item
       const result = await processor(item, index);
-      
+
       // Register result in memory manager if it's a blob
       if (result instanceof Blob) {
         this.memoryManager.registerBlob(result);
@@ -205,12 +210,12 @@ class ChunkedProcessor {
    */
   async waitForMemory(required, maxWait = 30000) {
     const startTime = Date.now();
-    
+
     while (!this.memoryManager.hasAvailableMemory(required)) {
       if (Date.now() - startTime > maxWait) {
         throw new Error('Timeout waiting for available memory');
       }
-      
+
       // Trigger cleanup and wait
       this.memoryManager.triggerCleanup();
       await this.delay(100);
@@ -259,15 +264,15 @@ class ChunkedProcessor {
    */
   calculateAdaptiveChunkSize(avgFileSize) {
     const MB = 1024 * 1024;
-    
+
     if (avgFileSize < MB) {
       return 10; // Small files: process 10 at a time
     } else if (avgFileSize < 10 * MB) {
-      return 5;  // Medium files: process 5 at a time
+      return 5; // Medium files: process 5 at a time
     } else if (avgFileSize < 50 * MB) {
-      return 3;  // Large files: process 3 at a time
+      return 3; // Large files: process 3 at a time
     } else {
-      return 1;  // Very large files: process 1 at a time
+      return 1; // Very large files: process 1 at a time
     }
   }
 
@@ -287,37 +292,47 @@ class ChunkedProcessor {
     } = options;
 
     let lastError;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        return await this.processInChunks(items, async (item, index) => {
-          // Wrap processor with retry logic for individual items
-          let itemError;
-          
-          for (let itemAttempt = 0; itemAttempt <= maxRetries; itemAttempt++) {
-            try {
-              return await processor(item, index);
-            } catch (error) {
-              itemError = error;
-              
-              if (itemAttempt < maxRetries) {
-                await this.delay(retryDelay * Math.pow(retryBackoff, itemAttempt));
+        return await this.processInChunks(
+          items,
+          async (item, index) => {
+            // Wrap processor with retry logic for individual items
+            let itemError;
+
+            for (
+              let itemAttempt = 0;
+              itemAttempt <= maxRetries;
+              itemAttempt++
+            ) {
+              try {
+                return await processor(item, index);
+              } catch (error) {
+                itemError = error;
+
+                if (itemAttempt < maxRetries) {
+                  await this.delay(
+                    retryDelay * Math.pow(retryBackoff, itemAttempt)
+                  );
+                }
               }
             }
-          }
-          
-          throw itemError;
-        }, processOptions);
+
+            throw itemError;
+          },
+          processOptions
+        );
       } catch (error) {
         lastError = error;
-        
+
         if (attempt < maxRetries) {
           console.warn(`Processing attempt ${attempt + 1} failed, retrying...`);
           await this.delay(retryDelay * Math.pow(retryBackoff, attempt));
         }
       }
     }
-    
+
     throw lastError;
   }
 
@@ -327,7 +342,7 @@ class ChunkedProcessor {
    * @returns {Promise} - Promise that resolves after delay
    */
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -342,7 +357,7 @@ class ChunkedProcessor {
       chunkDelay: this.chunkDelay,
       queueLength: this.processingQueue.length,
       isProcessing: this.isProcessing,
-      memoryStatus: this.memoryManager.getMemoryStatus()
+      memoryStatus: this.memoryManager.getMemoryStatus(),
     };
   }
 
