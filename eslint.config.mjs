@@ -1,4 +1,4 @@
-import next from 'eslint-config-next';
+import nextPlugin from '@next/eslint-plugin-next';
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
