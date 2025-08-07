@@ -117,7 +117,7 @@ async function demonstrateQueue() {
 export { demonstrateQueue };
 
 // Run demonstration if this file is executed directly
-// eslint-disable-next-line no-undef
+/* eslint-disable no-undef */
 if (
   typeof process !== 'undefined' &&
   process.argv &&
@@ -125,3 +125,4 @@ if (
 ) {
   demonstrateQueue().catch(console.error);
 }
+/* eslint-enable no-undef */
