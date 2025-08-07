@@ -3,7 +3,7 @@
  * Demonstrates priority handling, event listeners, and queue management
  */
 
-import { getConversionQueue, Priority, QueueItemState } from './conversion-queue.js';
+import { getConversionQueue, Priority } from './conversion-queue.js';
 
 // Initialize the conversion queue
 const queue = getConversionQueue({ maxConcurrent: 2 });
@@ -53,7 +53,7 @@ async function demonstrateQueue() {
   });
 
   // Add high priority item
-  const highPriorityId = queue.add({
+  queue.add({
     file: createMockFile('urgent-photo.heic', 1024 * 1024),
     targetFormat: 'jpeg',
     options: { quality: 95 },
@@ -61,14 +61,14 @@ async function demonstrateQueue() {
   });
 
   // Add normal priority items
-  const normalId1 = queue.add({
+  queue.add({
     file: createMockFile('photo1.heic', 512 * 1024),
     targetFormat: 'jpeg',
     options: { quality: 90 },
     priority: Priority.NORMAL
   });
 
-  const normalId2 = queue.add({
+  queue.add({
     file: createMockFile('photo2.heic', 768 * 1024),
     targetFormat: 'png',
     priority: Priority.NORMAL
@@ -116,6 +116,7 @@ async function demonstrateQueue() {
 export { demonstrateQueue };
 
 // Run demonstration if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// eslint-disable-next-line no-undef
+if (typeof process !== 'undefined' && process.argv && import.meta.url === `file://${process.argv[1]}`) {
   demonstrateQueue().catch(console.error);
 }
