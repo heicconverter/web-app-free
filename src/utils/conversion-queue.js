@@ -12,7 +12,7 @@ class ConversionQueue {
       totalProcessed: 0,
       totalFailed: 0,
       totalCancelled: 0,
-      averageProcessingTime: 0
+      averageProcessingTime: 0,
     };
   }
 
@@ -32,7 +32,7 @@ class ConversionQueue {
     if (this.processing) return;
     this.processing = true;
     while (this.activeConversions.size < this.maxConcurrent) {
-      const nextItem = this.queue.find(item => item.state === 'PENDING');
+      const nextItem = this.queue.find((item) => item.state === 'PENDING');
       if (!nextItem) break;
       nextItem.state = 'PROCESSING';
       nextItem.startedAt = Date.now();
@@ -46,9 +46,9 @@ class ConversionQueue {
   async _convert(item) {
     try {
       // Simulate conversion (replace with actual HEIC conversion logic)
-      await new Promise(res => setTimeout(res, 100));
+      await new Promise((res) => setTimeout(res, 100));
       const result = { size: item.file.size, type: 'image/jpeg' };
-      
+
       item.state = 'COMPLETED';
       item.completedAt = Date.now();
       item.result = result;
@@ -59,7 +59,7 @@ class ConversionQueue {
       item.state = 'FAILED';
       item.error = error.message;
       item.completedAt = Date.now();
-      
+
       if (item.retryCount < item.maxRetries) {
         item.retryCount++;
         item.state = 'PENDING';
@@ -77,9 +77,9 @@ class ConversionQueue {
   }
 
   cancel(id) {
-    const item = this.queue.find(item => item.id === id);
+    const item = this.queue.find((item) => item.id === id);
     if (!item || item.state !== 'PENDING') return false;
-    
+
     item.state = 'CANCELLED';
     item.completedAt = Date.now();
     this.stats.totalCancelled++;
@@ -88,11 +88,17 @@ class ConversionQueue {
   }
 
   getStatus() {
-    const pending = this.queue.filter(item => item.state === 'PENDING').length;
+    const pending = this.queue.filter(
+      (item) => item.state === 'PENDING'
+    ).length;
     const processing = this.activeConversions.size;
-    const completed = this.queue.filter(item => item.state === 'COMPLETED').length;
-    const failed = this.queue.filter(item => item.state === 'FAILED').length;
-    const cancelled = this.queue.filter(item => item.state === 'CANCELLED').length;
+    const completed = this.queue.filter(
+      (item) => item.state === 'COMPLETED'
+    ).length;
+    const failed = this.queue.filter((item) => item.state === 'FAILED').length;
+    const cancelled = this.queue.filter(
+      (item) => item.state === 'CANCELLED'
+    ).length;
 
     return {
       pending,
@@ -101,15 +107,16 @@ class ConversionQueue {
       failed,
       cancelled,
       total: this.queue.length,
-      stats: { ...this.stats }
+      stats: { ...this.stats },
     };
   }
 
   updateAverageProcessingTime(item) {
     const processingTime = item.completedAt - item.startedAt;
     const totalItems = this.stats.totalProcessed;
-    this.stats.averageProcessingTime = 
-      (this.stats.averageProcessingTime * (totalItems - 1) + processingTime) / totalItems;
+    this.stats.averageProcessingTime =
+      (this.stats.averageProcessingTime * (totalItems - 1) + processingTime) /
+      totalItems;
   }
 
   on(event, callback) {
@@ -121,12 +128,12 @@ class ConversionQueue {
 
   emitEvent(event, data) {
     if (this.listeners.has(event)) {
-      this.listeners.get(event).forEach(callback => callback(data));
+      this.listeners.get(event).forEach((callback) => callback(data));
     }
   }
 
   clearCompleted() {
-    this.queue = this.queue.filter(item => item.state !== 'COMPLETED');
+    this.queue = this.queue.filter((item) => item.state !== 'COMPLETED');
   }
 
   clearAll() {

@@ -47,17 +47,18 @@ async function demonstrateQueue() {
   console.log('Starting queue demonstration...\n');
 
   // Mock file objects for testing
-  const createMockFile = (name, size) => new Blob(['test'], { 
-    type: 'image/heic',
-    size: size 
-  });
+  const createMockFile = (name, size) =>
+    new Blob(['test'], {
+      type: 'image/heic',
+      size: size,
+    });
 
   // Add high priority item
   queue.add({
     file: createMockFile('urgent-photo.heic', 1024 * 1024),
     targetFormat: 'jpeg',
     options: { quality: 95 },
-    priority: Priority.HIGH
+    priority: Priority.HIGH,
   });
 
   // Add normal priority items
@@ -65,13 +66,13 @@ async function demonstrateQueue() {
     file: createMockFile('photo1.heic', 512 * 1024),
     targetFormat: 'jpeg',
     options: { quality: 90 },
-    priority: Priority.NORMAL
+    priority: Priority.NORMAL,
   });
 
   queue.add({
     file: createMockFile('photo2.heic', 768 * 1024),
     targetFormat: 'png',
-    priority: Priority.NORMAL
+    priority: Priority.NORMAL,
   });
 
   // Add low priority item
@@ -79,7 +80,7 @@ async function demonstrateQueue() {
     file: createMockFile('background.heic', 256 * 1024),
     targetFormat: 'jpeg',
     options: { quality: 80 },
-    priority: Priority.LOW
+    priority: Priority.LOW,
   });
 
   // Check queue status
@@ -98,14 +99,14 @@ async function demonstrateQueue() {
       pending: status.pending,
       processing: status.processing,
       completed: status.completed,
-      failed: status.failed
+      failed: status.failed,
     });
 
     if (status.pending === 0 && status.processing === 0) {
       console.log('\nQueue processing complete!');
       console.log('Final statistics:', status.stats);
       clearInterval(checkInterval);
-      
+
       // Clean up completed items
       queue.clearCompleted();
     }
@@ -117,6 +118,10 @@ export { demonstrateQueue };
 
 // Run demonstration if this file is executed directly
 // eslint-disable-next-line no-undef
-if (typeof process !== 'undefined' && process.argv && import.meta.url === `file://${process.argv[1]}`) {
+if (
+  typeof process !== 'undefined' &&
+  process.argv &&
+  import.meta.url === `file://${process.argv[1]}`
+) {
   demonstrateQueue().catch(console.error);
 }
