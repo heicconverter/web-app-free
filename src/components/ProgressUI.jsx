@@ -278,35 +278,4 @@ export const ProgressUI = ({ className = '' }) => {
   );
 };
 
-// Format helper functions (create these in a separate utils file)
-const createFormatHelpers = () => {
-  const script = document.createElement('script');
-  script.textContent = `
-    // src/utils/format-helpers.js
-    export function formatBytes(bytes) {
-      if (bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-    }
-
-    export function formatTime(ms) {
-      if (ms < 1000) return 'less than a second';
-      const seconds = Math.floor(ms / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      
-      if (hours > 0) {
-        return hours + 'h ' + (minutes % 60) + 'm';
-      } else if (minutes > 0) {
-        return minutes + 'm ' + (seconds % 60) + 's';
-      } else {
-        return seconds + 's';
-      }
-    }
-  `;
-  document.head.appendChild(script);
-};
-
 export default ProgressUI;
