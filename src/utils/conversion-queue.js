@@ -212,7 +212,7 @@ export class ConversionQueue {
    * Handle messages from workers
    */
   handleWorkerMessage(worker, event) {
-    const { type, taskId } = event.data;
+    const { type } = event.data;
     const activeTask = this.activeWorkers.get(worker.metadata.taskId);
     
     if (!activeTask) return;
@@ -473,7 +473,7 @@ export class ConversionQueue {
     }
 
     // Cancel active tasks
-    for (const [taskId, { worker, task }] of this.activeWorkers) {
+    for (const [_taskId, { worker, task }] of this.activeWorkers) {
       const cancelType = task.type === 'batch' ? 'cancel-batch' : 'cancel';
       worker.postMessage({ type: cancelType });
     }
