@@ -41,20 +41,20 @@ class ProgressTracker {
     this.emitEvent('progressUpdated', this.getProgress());
   }
 
-  completeFile(fileSize) {
+  completeFile(_fileSize) {
     this.stats.processedFiles++;
     this.updateEstimates();
     this.emitEvent('fileCompleted', this.getProgress());
   }
 
-  failFile(fileSize) {
+  failFile(_fileSize) {
     this.stats.failedFiles++;
     this.stats.processedFiles++;
     this.updateEstimates();
     this.emitEvent('fileFailed', this.getProgress());
   }
 
-  cancelFile(fileSize) {
+  cancelFile(_fileSize) {
     this.stats.cancelledFiles++;
     this.updateEstimates();
     this.emitEvent('fileCancelled', this.getProgress());
