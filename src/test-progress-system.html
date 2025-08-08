@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Tracking System Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+    
+    h1 {
+      color: #1f2937;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .test-section h2 {
+      color: #374151;
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .test-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .status-display {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #1f2937;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .status-line {
+      padding: 4px 0;
+      border-bottom: 1px dashed #e5e7eb;
+    }
+    
+    .status-line:last-child {
+      border-bottom: none;
+    }
+    
+    .progress-value {
+      color: #3b82f6;
+      font-weight: bold;
+    }
+    
+    .file-input-wrapper {
+      margin: 15px 0;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #f3f4f6;
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .file-input-label:hover {
+      background: #e5e7eb;
+      border-color: #9ca3af;
+    }
+    
+    .file-list {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    .test-info {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #92400e;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #4338ca, #7c3aed);
+      }
+      
+      .container {
+        background: #1f2937;
+        color: #f3f4f6;
+      }
+      
+      h1 {
+        color: #f3f4f6;
+      }
+      
+      .subtitle {
+        color: #9ca3af;
+      }
+      
+      .test-section {
+        background: #111827;
+        border-color: #374151;
+      }
+      
+      .test-section h2 {
+        color: #e5e7eb;
+      }
+      
+      .status-display {
+        background: #111827;
+        color: #f3f4f6;
+        border-color: #374151;
+      }
+      
+      .status-line {
+        border-color: #374151;
+      }
+      
+      .file-input-label {
+        background: #374151;
+        border-color: #4b5563;
+        color: #e5e7eb;
+      }
+      
+      .file-input-label:hover {
+        background: #4b5563;
+        border-color: #6b7280;
+      }
+      
+      .test-info {
+        background: #422006;
+        border-color: #92400e;
+        color: #fbbf24;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 HEIC Converter Progress System Test</h1>
+    <p class="subtitle">Task 1.3.5: Progress Tracking and Cancellation Testing Suite</p>
+    
+    <!-- Test Section 1: Basic Progress Tracking -->
+    <div class="test-section">
+      <h2>📊 Basic Progress Tracking</h2>
+      <div class="test-info">
+        ℹ️ Tests the ProgressTracker class with simulated conversions
+      </div>
+      <div class="test-controls">
+        <button class="btn-primary" onclick="testBasicProgress()">
+          ▶️ Start Basic Test
+        </button>
+        <button class="btn-warning" onclick="testSlowProgress()">
+          🐌 Slow Progress Test
+        </button>
+        <button class="btn-danger" onclick="cancelCurrentTest()">
+          ⏹️ Cancel Test
+        </button>
+      </div>
+      <div id="basic-status" class="status-display">
+        <div class="status-line">Ready to test basic progress tracking...</div>
+      </div>
+    </div>
+    
+    <!-- Test Section 2: Worker Integration -->
+    <div class="test-section">
+      <h2>⚙️ Worker Integration Test</h2>
+      <div class="test-info">
+        ℹ️ Tests the HEIC converter worker with real progress updates
+      </div>
+      <div class="file-input-wrapper">
+        <label for="single-file" class="file-input-label">
+          📁 Choose HEIC File (or we'll simulate one)
+        </label>
+        <input type="file" id="single-file" accept=".heic,.heif" onchange="handleSingleFile(event)">
+        <div id="single-file-name" class="file-list"></div>
+      </div>
+      <div class="test-controls">
+        <button class="btn-success" onclick="testWorkerConversion()">
+          🔄 Test Worker Conversion
+        </button>
+        <button class="btn-danger" onclick="testWorkerCancellation()">
+          ❌ Test Cancellation
+        </button>
+      </div>
+      <div id="worker-status" class="status-display">
+        <div class="status-line">Worker not started yet...</div>
+      </div>
+    </div>
+    
+    <!-- Test Section 3: Batch Processing -->
+    <div class="test-section">
+      <h2>📦 Batch Processing Test</h2>
+      <div class="test-info">
+        ℹ️ Tests batch conversion with multiple files
+      </div>
+      <div class="file-input-wrapper">
+        <label for="batch-files" class="file-input-label">
+          📁 Choose Multiple HEIC Files (or simulate)
+        </label>
+        <input type="file" id="batch-files" accept=".heic,.heif" multiple onchange="handleBatchFiles(event)">
+        <div id="batch-file-list" class="file-list"></div>
+      </div>
+      <div class="test-controls">
+        <button class="btn-success" onclick="testBatchConversion()">
+          🚀 Start Batch Test
+        </button>
+        <button class="btn-warning" onclick="testBatchWithErrors()">
+          ⚠️ Test with Errors
+        </button>
+        <button class="btn-danger" onclick="cancelBatchTest()">
+          🛑 Cancel Batch
+        </button>
+      </div>
+      <div id="batch-status" class="status-display">
+        <div class="status-line">Batch processor ready...</div>
+      </div>
+    </div>
+    
+    <!-- Test Section 4: Queue Management -->
+    <div class="test-section">
+      <h2>📋 Queue Management Test</h2>
+      <div class="test-info">
+        ℹ️ Tests the ConversionQueue with multiple concurrent tasks
+      </div>
+      <div class="test-controls">
+        <button class="btn-primary" onclick="testQueueManagement()">
+          🎯 Test Queue System
+        </button>
+        <button class="btn-success" onclick="addTasksToQueue()">
+          ➕ Add 5 Tasks
+        </button>
+        <button class="btn-warning" onclick="testQueueOverload()">
+          💥 Stress Test (20 tasks)
+        </button>
+        <button class="btn-danger" onclick="cancelAllQueue()">
+          ⏸️ Cancel All Queue
+        </button>
+        <button class="btn-secondary" onclick="getQueueStatus()">
+          📊 Queue Status
+        </button>
+      </div>
+      <div id="queue-status" class="status-display">
+        <div class="status-line">Queue system initialized...</div>
+      </div>
+    </div>
+    
+    <!-- Test Section 5: UI Integration -->
+    <div class="test-section">
+      <h2>🎨 Progress UI Component Test</h2>
+      <div class="test-info">
+        ℹ️ Tests the React Progress UI component (check bottom-right corner)
+      </div>
+      <div class="test-controls">
+        <button class="btn-primary" onclick="mountProgressUI()">
+          🖼️ Mount Progress UI
+        </button>
+        <button class="btn-success" onclick="simulateUIUpdates()">
+          📈 Simulate UI Updates
+        </button>
+        <button class="btn-danger" onclick="unmountProgressUI()">
+          🗑️ Unmount UI
+        </button>
+      </div>
+      <div id="ui-status" class="status-display">
+        <div class="status-line">Progress UI not mounted...</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- React root for Progress UI -->
+  <div id="progress-ui-root"></div>
+  
+  <script type="module">
+    // Import all the modules we've created
+    import ProgressTracker from './utils/progress-tracker.js';
+    import { ConversionQueue } from './utils/conversion-queue.js';
+    import { formatBytes, formatTime } from './utils/format-helpers.js';
+    
+    // Make functions globally available for onclick handlers
+    window.progressTracker = new ProgressTracker();
+    window.conversionQueue = new ConversionQueue();
+    window.currentTestTask = null;
+    window.selectedSingleFile = null;
+    window.selectedBatchFiles = [];
+    
+    // Status display helpers
+    function updateStatus(elementId, message, append = false) {
+      const display = document.getElementById(elementId);
+      const timestamp = new Date().toLocaleTimeString();
+      const line = `<div class="status-line">[${timestamp}] ${message}</div>`;
+      
+      if (append) {
+        display.innerHTML += line;
+      } else {
+        display.innerHTML = line;
+      }
+      
+      display.scrollTop = display.scrollHeight;
+    }
+    
+    // Test 1: Basic Progress Tracking
+    window.testBasicProgress = async function() {
+      const taskId = 'test-basic-' + Date.now();
+      updateStatus('basic-status', '🚀 Starting basic progress test...');
+      
+      progressTracker.createTask(taskId, {
+        fileName: 'test-image.heic',
+        fileSize: 1024 * 1024 * 5 // 5MB
+      });
+      
+      window.currentTestTask = taskId;
+      
+      // Simulate progress updates
+      const stages = [
+        { progress: 10, message: '📂 Loading file...', delay: 500 },
+        { progress: 30, message: '🔍 Analyzing HEIC structure...', delay: 800 },
+        { progress: 50, message: '🎨 Decoding image data...', delay: 1000 },
+        { progress: 70, message: '🖼️ Encoding to JPEG...', delay: 800 },
+        { progress: 90, message: '✨ Optimizing output...', delay: 600 },
+        { progress: 100, message: '✅ Conversion complete!', delay: 400 }
+      ];
+      
+      for (const stage of stages) {
+        if (!window.currentTestTask) break;
+        
+        await new Promise(resolve => setTimeout(resolve, stage.delay));
+        progressTracker.updateProgress(taskId, stage.progress, stage.message);
+        
+        const progress = progressTracker.getTaskProgress(taskId);
+        updateStatus('basic-status', 
+          `<span class="progress-value">${progress.progress}%</span> - ${stage.message}`, 
+          true
+        );
+      }
+      
+      if (window.currentTestTask) {
+        progressTracker.completeTask(taskId);
+        updateStatus('basic-status', '🎉 Test completed successfully!', true);
+      }
+    };
+    
+    // Test 2: Slow Progress
+    window.testSlowProgress = async function() {
+      const taskId = 'test-slow-' + Date.now();
+      updateStatus('basic-status', '🐌 Starting slow progress test...');
+      
+      progressTracker.createTask(taskId, {
+        fileName: 'large-image.heic',
+        fileSize: 1024 * 1024 * 50 // 50MB
+      });
+      
+      window.currentTestTask = taskId;
+      
+      for (let i = 0; i <= 100; i += 5) {
+        if (!window.currentTestTask) break;
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+        progressTracker.updateProgress(taskId, i, `Processing... ${i}%`);
+        
+        updateStatus('basic-status', 
+          `<span class="progress-value">${i}%</span> - Slow processing simulation`, 
+          i > 0
+        );
+      }
+      
+      if (window.currentTestTask) {
+        progressTracker.completeTask(taskId);
+        updateStatus('basic-status', '✅ Slow test completed!', true);
+      }
+    };
+    
+    // Cancel current test
+    window.cancelCurrentTest = function() {
+      if (window.currentTestTask) {
+        progressTracker.cancelTask(window.currentTestTask);
+        updateStatus('basic-status', '❌ Test cancelled by user', true);
+        window.currentTestTask = null;
+      }
+    };
+    
+    // Test 3: Worker Conversion
+    window.testWorkerConversion = async function() {
+      updateStatus('worker-status', '🔄 Initializing worker...');
+      
+      // Create a simulated file if none selected
+      const file = window.selectedSingleFile || new File(
+        [new ArrayBuffer(1024 * 1024)], 
+        'simulated.heic',
+        { type: 'image/heic' }
+      );
+      
+      const taskId = await conversionQueue.addFile(file, {
+        targetType: 'jpeg',
+        quality: 90
+      });
+      
+      updateStatus('worker-status', `📋 Task ${taskId} added to queue`, true);
+      
+      // Listen for progress updates
+      const progressHandler = (data) => {
+        if (data.taskId === taskId) {
+          updateStatus('worker-status', 
+            `<span class="progress-value">${data.progress}%</span> - ${data.message}`,
+            true
+          );
+        }
+      };
+      
+      conversionQueue.on('progress', progressHandler);
+      
+      // Clean up after completion
+      const completeHandler = (data) => {
+        if (data.taskId === taskId) {
+          updateStatus('worker-status', '✅ Worker conversion completed!', true);
+          conversionQueue.off('progress', progressHandler);
+          conversionQueue.off('complete', completeHandler);
+        }
+      };
+      
+      conversionQueue.on('complete', completeHandler);
+    };
+    
+    // Test 4: Batch Conversion
+    window.testBatchConversion = async function() {
+      updateStatus('batch-status', '📦 Starting batch conversion...');
+      
+      // Create simulated files if none selected
+      const files = window.selectedBatchFiles.length > 0 
+        ? window.selectedBatchFiles
+        : Array.from({ length: 5 }, (_, i) => 
+            new File(
+              [new ArrayBuffer(1024 * 512)],
+              `image-${i + 1}.heic`,
+              { type: 'image/heic' }
+            )
+          );
+      
+      const taskId = await conversionQueue.addBatch(files, {
+        targetType: 'jpeg',
+        quality: 85
+      });
+      
+      updateStatus('batch-status', `📋 Batch task ${taskId} with ${files.length} files`, true);
+      
+      // Track batch progress
+      const progressHandler = (data) => {
+        if (data.taskId === taskId) {
+          updateStatus('batch-status',
+            `<span class="progress-value">${Math.round(data.progress)}%</span> - ${data.currentFile || data.message}`,
+            true
+          );
+        }
+      };
+      
+      conversionQueue.on('progress', progressHandler);
+    };
+    
+    // Test 5: Queue Management
+    window.testQueueManagement = async function() {
+      updateStatus('queue-status', '🎯 Testing queue management system...');
+      
+      // Add multiple tasks
+      for (let i = 0; i < 3; i++) {
+        const file = new File(
+          [new ArrayBuffer(1024 * 256)],
+          `queue-test-${i + 1}.heic`,
+          { type: 'image/heic' }
+        );
+        
+        const taskId = await conversionQueue.addFile(file);
+        updateStatus('queue-status', `➕ Added task ${i + 1} to queue`, true);
+      }
+      
+      // Monitor queue status
+      const interval = setInterval(() => {
+        const status = conversionQueue.getQueueStatus();
+        updateStatus('queue-status',
+          `📊 Queue: ${status.queued} queued, ${status.active} active, ${Math.round(status.progress)}% overall`,
+          true
+        );
+        
+        if (status.queued === 0 && status.active === 0) {
+          clearInterval(interval);
+          updateStatus('queue-status', '✅ All queue tasks completed!', true);
+        }
+      }, 1000);
+    };
+    
+    // File handlers
+    window.handleSingleFile = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        window.selectedSingleFile = file;
+        document.getElementById('single-file-name').textContent = 
+          `Selected: ${file.name} (${formatBytes(file.size)})`;
+      }
+    };
+    
+    window.handleBatchFiles = function(event) {
+      const files = Array.from(event.target.files);
+      if (files.length > 0) {
+        window.selectedBatchFiles = files;
+        document.getElementById('batch-file-list').textContent = 
+          `Selected: ${files.length} files (${formatBytes(files.reduce((sum, f) => sum + f.size, 0))} total)`;
+      }
+    };
+    
+    // Additional test functions
+    window.addTasksToQueue = async function() {
+      for (let i = 0; i < 5; i++) {
+        const file = new File([new ArrayBuffer(1024 * 128)], `task-${Date.now()}-${i}.heic`);
+        await conversionQueue.addFile(file);
+      }
+      updateStatus('queue-status', '➕ Added 5 tasks to queue', true);
+    };
+    
+    window.testQueueOverload = async function() {
+      updateStatus('queue-status', '💥 Starting stress test with 20 tasks...');
+      for (let i = 0; i < 20; i++) {
+        const file = new File([new ArrayBuffer(1024 * 64)], `stress-${i}.heic`);
+        await conversionQueue.addFile(file);
+      }
+    };
+    
+    window.cancelAllQueue = function() {
+      conversionQueue.cancelAll();
+      updateStatus('queue-status', '🛑 All queue tasks cancelled', true);
+    };
+    
+    window.getQueueStatus = function() {
+      const status = conversionQueue.getQueueStatus();
+      updateStatus('queue-status', 
+        `📊 Current Status: ${JSON.stringify(status, null, 2)}`,
+        true
+      );
+    };
+    
+    // Initialize
+    updateStatus('basic-status', '✅ Progress tracking system initialized');
+    updateStatus('worker-status', '✅ Worker system ready');
+    updateStatus('batch-status', '✅ Batch processor ready');
+    updateStatus('queue-status', '✅ Queue management system ready');
+    updateStatus('ui-status', '✅ Test environment ready');
+    
+    console.log('🚀 HEIC Converter Progress System Test Suite Loaded');
+    console.log('📊 Progress Tracker:', window.progressTracker);
+    console.log('📋 Conversion Queue:', window.conversionQueue);
+  </script>
+</body>
+</html>
