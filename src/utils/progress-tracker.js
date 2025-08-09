@@ -19,7 +19,7 @@ class ProgressTracker {
       endTime: null,
       averageFileSize: 0,
       estimatedTimeRemaining: null,
-      currentThroughput: 0
+      currentThroughput: 0,
     };
   }
 
@@ -63,15 +63,16 @@ class ProgressTracker {
   updateEstimates() {
     const now = Date.now();
     const elapsed = now - this.stats.startTime;
-    
+
     if (elapsed > 0 && this.stats.processedBytes > 0) {
       // Calculate throughput in bytes per millisecond
       this.stats.currentThroughput = this.stats.processedBytes / elapsed;
-      
+
       // Estimate remaining time
       const remainingBytes = this.stats.totalBytes - this.stats.processedBytes;
       if (this.stats.currentThroughput > 0) {
-        this.stats.estimatedTimeRemaining = remainingBytes / this.stats.currentThroughput;
+        this.stats.estimatedTimeRemaining =
+          remainingBytes / this.stats.currentThroughput;
       }
     }
   }
@@ -82,16 +83,18 @@ class ProgressTracker {
   }
 
   getProgress() {
-    const fileProgress = this.stats.totalFiles > 0 
-      ? (this.stats.processedFiles / this.stats.totalFiles) * 100 
-      : 0;
-    
-    const byteProgress = this.stats.totalBytes > 0 
-      ? (this.stats.processedBytes / this.stats.totalBytes) * 100 
-      : 0;
+    const fileProgress =
+      this.stats.totalFiles > 0
+        ? (this.stats.processedFiles / this.stats.totalFiles) * 100
+        : 0;
 
-    const elapsedTime = this.stats.startTime 
-      ? (this.stats.endTime || Date.now()) - this.stats.startTime 
+    const byteProgress =
+      this.stats.totalBytes > 0
+        ? (this.stats.processedBytes / this.stats.totalBytes) * 100
+        : 0;
+
+    const elapsedTime = this.stats.startTime
+      ? (this.stats.endTime || Date.now()) - this.stats.startTime
       : 0;
 
     return {
@@ -100,7 +103,7 @@ class ProgressTracker {
       byteProgressPercent: Math.round(byteProgress * 100) / 100,
       elapsedTime,
       isComplete: this.stats.processedFiles >= this.stats.totalFiles,
-      throughputBytesPerSecond: this.stats.currentThroughput * 1000
+      throughputBytesPerSecond: this.stats.currentThroughput * 1000,
     };
   }
 
@@ -113,7 +116,7 @@ class ProgressTracker {
 
   off(event, callback) {
     if (!this.listeners.has(event)) return;
-    
+
     const callbacks = this.listeners.get(event);
     const index = callbacks.indexOf(callback);
     if (index !== -1) {
@@ -123,12 +126,15 @@ class ProgressTracker {
 
   emitEvent(event, data) {
     if (!this.listeners.has(event)) return;
-    
-    this.listeners.get(event).forEach(callback => {
+
+    this.listeners.get(event).forEach((callback) => {
       try {
         callback(data);
       } catch (error) {
-        console.error(`Error in progress tracker listener for ${event}:`, error);
+        console.error(
+          `Error in progress tracker listener for ${event}:`,
+          error
+        );
       }
     });
   }

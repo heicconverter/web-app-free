@@ -14,7 +14,7 @@ export const ProgressUI = ({ className = '' }) => {
     queued: 0,
     active: 0,
     progress: 0,
-    workers: { single: 0, batch: 0 }
+    workers: { single: 0, batch: 0 },
   });
   const [isMinimized, setIsMinimized] = useState(false);
   const updateInterval = useRef(null);
@@ -27,7 +27,7 @@ export const ProgressUI = ({ className = '' }) => {
         stage: data.stage,
         message: data.message,
         currentFile: data.currentFile,
-        details: data.details
+        details: data.details,
       });
     };
 
@@ -37,9 +37,9 @@ export const ProgressUI = ({ className = '' }) => {
         progress: 100,
         result: data.result,
         metadata: data.metadata,
-        summary: data.summary
+        summary: data.summary,
       });
-      
+
       // Remove completed task after delay
       setTimeout(() => removeTask(data.taskId), 5000);
     };
@@ -47,16 +47,16 @@ export const ProgressUI = ({ className = '' }) => {
     const handleError = (data) => {
       updateTask(data.taskId, {
         status: 'error',
-        error: data.error
+        error: data.error,
       });
     };
 
     const handleCancelled = (data) => {
       updateTask(data.taskId, {
         status: 'cancelled',
-        message: data.message
+        message: data.message,
       });
-      
+
       // Remove cancelled task after delay
       setTimeout(() => removeTask(data.taskId), 3000);
     };
@@ -77,7 +77,7 @@ export const ProgressUI = ({ className = '' }) => {
       conversionQueue.off('complete', handleComplete);
       conversionQueue.off('error', handleError);
       conversionQueue.off('cancelled', handleCancelled);
-      
+
       if (updateInterval.current) {
         clearInterval(updateInterval.current);
       }
@@ -85,10 +85,10 @@ export const ProgressUI = ({ className = '' }) => {
   }, []);
 
   const updateTask = (taskId, updates) => {
-    setTasks(prev => {
-      const existing = prev.find(t => t.id === taskId);
+    setTasks((prev) => {
+      const existing = prev.find((t) => t.id === taskId);
       if (existing) {
-        return prev.map(t => t.id === taskId ? { ...t, ...updates } : t);
+        return prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
       } else {
         return [...prev, { id: taskId, ...updates }];
       }
@@ -96,7 +96,7 @@ export const ProgressUI = ({ className = '' }) => {
   };
 
   const removeTask = (taskId) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
   const handleCancelTask = (taskId) => {
@@ -118,21 +118,33 @@ export const ProgressUI = ({ className = '' }) => {
 
   const getStageIcon = (stage) => {
     switch (stage) {
-      case 'loading': return '📂';
-      case 'decoding': return '🔍';
-      case 'encoding': return '🎨';
-      case 'finalizing': return '✨';
-      case 'complete': return '✅';
-      default: return '⏳';
+      case 'loading':
+        return '📂';
+      case 'decoding':
+        return '🔍';
+      case 'encoding':
+        return '🎨';
+      case 'finalizing':
+        return '✨';
+      case 'complete':
+        return '✅';
+      default:
+        return '⏳';
     }
   };
 
-  if (tasks.length === 0 && queueStatus.queued === 0 && queueStatus.active === 0) {
+  if (
+    tasks.length === 0 &&
+    queueStatus.queued === 0 &&
+    queueStatus.active === 0
+  ) {
     return null;
   }
 
   return (
-    <div className={`progress-ui ${className} ${isMinimized ? 'minimized' : ''}`}>
+    <div
+      className={`progress-ui ${className} ${isMinimized ? 'minimized' : ''}`}
+    >
       {/* Header */}
       <div className="progress-header">
         <div className="progress-title">
@@ -171,18 +183,20 @@ export const ProgressUI = ({ className = '' }) => {
               className="progress-bar overall"
               style={{
                 width: `${queueStatus.progress}%`,
-                backgroundColor: '#3b82f6'
+                backgroundColor: '#3b82f6',
               }}
             />
           </div>
-          <div className="progress-percentage">{Math.round(queueStatus.progress)}%</div>
+          <div className="progress-percentage">
+            {Math.round(queueStatus.progress)}%
+          </div>
         </div>
       )}
 
       {/* Task List */}
       {!isMinimized && (
         <div className="task-list">
-          {tasks.map(task => (
+          {tasks.map((task) => (
             <div key={task.id} className={`task-item ${task.status}`}>
               <div className="task-header">
                 <span className="task-icon">{getStageIcon(task.stage)}</span>
@@ -206,11 +220,13 @@ export const ProgressUI = ({ className = '' }) => {
                     className="progress-bar"
                     style={{
                       width: `${task.progress || 0}%`,
-                      backgroundColor: getProgressBarColor(task)
+                      backgroundColor: getProgressBarColor(task),
                     }}
                   />
                 </div>
-                <span className="progress-text">{Math.round(task.progress || 0)}%</span>
+                <span className="progress-text">
+                  {Math.round(task.progress || 0)}%
+                </span>
               </div>
 
               <div className="task-details">
@@ -219,7 +235,8 @@ export const ProgressUI = ({ className = '' }) => {
                   <div className="task-metadata">
                     {task.details.filesProcessed !== undefined && (
                       <span>
-                        Files: {task.details.filesProcessed}/{task.details.totalFiles}
+                        Files: {task.details.filesProcessed}/
+                        {task.details.totalFiles}
                       </span>
                     )}
                     {task.details.estimatedTimeRemaining && (
@@ -231,14 +248,12 @@ export const ProgressUI = ({ className = '' }) => {
                       <>
                         {task.metadata.originalSize && (
                           <span>
-                            Size: {formatBytes(task.metadata.originalSize)} → 
+                            Size: {formatBytes(task.metadata.originalSize)} →
                             {formatBytes(task.metadata.convertedSize)}
                           </span>
                         )}
                         {task.metadata.compressionRatio && (
-                          <span>
-                            Saved: {task.metadata.compressionRatio}%
-                          </span>
+                          <span>Saved: {task.metadata.compressionRatio}%</span>
                         )}
                       </>
                     )}
@@ -247,9 +262,7 @@ export const ProgressUI = ({ className = '' }) => {
               </div>
 
               {task.status === 'error' && (
-                <div className="task-error">
-                  ⚠️ {task.error}
-                </div>
+                <div className="task-error">⚠️ {task.error}</div>
               )}
 
               {task.summary && (
@@ -270,7 +283,8 @@ export const ProgressUI = ({ className = '' }) => {
       {!isMinimized && (
         <div className="worker-status">
           <span className="worker-info">
-            Workers: {queueStatus.workers.single} single, {queueStatus.workers.batch} batch available
+            Workers: {queueStatus.workers.single} single,{' '}
+            {queueStatus.workers.batch} batch available
           </span>
         </div>
       )}

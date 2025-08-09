@@ -15,7 +15,7 @@ function sendProgress(progress, stage, message) {
     progress,
     stage,
     message,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -26,9 +26,9 @@ self.onmessage = async function (e) {
   // Handle cancellation
   if (type === 'cancel') {
     isCancelled = true;
-    self.postMessage({ 
-      type: 'cancelled', 
-      message: 'Conversion cancelled by user' 
+    self.postMessage({
+      type: 'cancelled',
+      message: 'Conversion cancelled by user',
     });
     return;
   }
@@ -41,17 +41,17 @@ self.onmessage = async function (e) {
     try {
       // Stage 1: Loading file (0-20%)
       sendProgress(0, 'loading', 'Starting conversion...');
-      
+
       // Check for cancellation
       if (isCancelled) {
         throw new Error('Conversion cancelled');
       }
 
       sendProgress(10, 'loading', 'Reading file data...');
-      
+
       // Small delay to simulate file reading
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       if (isCancelled) {
         throw new Error('Conversion cancelled');
       }
@@ -60,7 +60,7 @@ self.onmessage = async function (e) {
 
       // Stage 2: Decoding HEIC (20-60%)
       sendProgress(20, 'decoding', 'Decoding HEIC format...');
-      
+
       if (isCancelled) {
         throw new Error('Conversion cancelled');
       }
@@ -73,8 +73,12 @@ self.onmessage = async function (e) {
       const progressInterval = setInterval(() => {
         if (!isCancelled) {
           const elapsed = Date.now() - conversionStartTime;
-          const estimatedProgress = Math.min(50, 20 + (elapsed / 100));
-          sendProgress(estimatedProgress, 'decoding', 'Processing image data...');
+          const estimatedProgress = Math.min(50, 20 + elapsed / 100);
+          sendProgress(
+            estimatedProgress,
+            'decoding',
+            'Processing image data...'
+          );
         }
       }, 100);
 
@@ -97,19 +101,23 @@ self.onmessage = async function (e) {
       sendProgress(60, 'decoding', 'Decoding complete');
 
       // Stage 3: Encoding output (60-90%)
-      sendProgress(60, 'encoding', `Encoding to ${targetType.toUpperCase()}...`);
-      
+      sendProgress(
+        60,
+        'encoding',
+        `Encoding to ${targetType.toUpperCase()}...`
+      );
+
       // Simulate encoding progress
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       if (isCancelled) {
         throw new Error('Conversion cancelled');
       }
 
       sendProgress(80, 'encoding', 'Optimizing output...');
-      
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       if (isCancelled) {
         throw new Error('Conversion cancelled');
       }
@@ -118,10 +126,10 @@ self.onmessage = async function (e) {
 
       // Stage 4: Finalizing (90-100%)
       sendProgress(90, 'finalizing', 'Finalizing conversion...');
-      
+
       // Create blob URL for the result
-      const blob = new Blob([result], { 
-        type: targetType === 'jpeg' ? 'image/jpeg' : 'image/png' 
+      const blob = new Blob([result], {
+        type: targetType === 'jpeg' ? 'image/jpeg' : 'image/png',
       });
 
       if (isCancelled) {
@@ -131,31 +139,30 @@ self.onmessage = async function (e) {
       sendProgress(100, 'complete', 'Conversion successful!');
 
       // Send success result
-      self.postMessage({ 
-        success: true, 
+      self.postMessage({
+        success: true,
         result: blob,
         metadata: {
           originalSize: file.size,
           convertedSize: blob.size,
           compressionRatio: ((1 - blob.size / file.size) * 100).toFixed(2),
           format: targetType,
-          quality: quality || (targetType === 'jpeg' ? 90 : 100)
-        }
+          quality: quality || (targetType === 'jpeg' ? 90 : 100),
+        },
       });
-
     } catch (error) {
       // Handle errors and cancellation
       if (error.message === 'Conversion cancelled') {
-        self.postMessage({ 
-          success: false, 
+        self.postMessage({
+          success: false,
           cancelled: true,
-          error: error.message 
+          error: error.message,
         });
       } else {
-        self.postMessage({ 
-          success: false, 
+        self.postMessage({
+          success: false,
           error: error.message,
-          stack: error.stack 
+          stack: error.stack,
         });
       }
     }
@@ -163,10 +170,10 @@ self.onmessage = async function (e) {
 };
 
 // Handle worker errors
-self.onerror = function(error) {
+self.onerror = function (error) {
   console.error('Worker error:', error);
-  self.postMessage({ 
-    success: false, 
-    error: 'Worker error: ' + error.message 
+  self.postMessage({
+    success: false,
+    error: 'Worker error: ' + error.message,
   });
 };

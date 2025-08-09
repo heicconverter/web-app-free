@@ -10,25 +10,25 @@ export class ConversionQueue {
     this.maxConcurrent = options.maxConcurrent || 2;
     this.maxRetries = options.maxRetries || 3;
     this.retryDelay = options.retryDelay || 1000;
-    
+
     // Queue management
     this.queue = [];
     this.activeWorkers = new Map();
     this.progressTracker = new ProgressTracker();
-    
+
     // Worker pools
     this.workerPool = [];
     this.batchWorkerPool = [];
     this.maxWorkers = options.maxWorkers || 4;
-    
+
     // Event handlers
     this.eventHandlers = {
       progress: [],
       complete: [],
       error: [],
-      cancelled: []
+      cancelled: [],
     };
-    
+
     // Initialize worker pools
     this.initializeWorkerPools();
   }
@@ -48,17 +48,18 @@ export class ConversionQueue {
    * Create a new worker instance
    */
   createWorker(type) {
-    const workerPath = type === 'batch' 
-      ? '/workers/batch-converter.worker.js'
-      : '/workers/heic-converter.worker.js';
-    
+    const workerPath =
+      type === 'batch'
+        ? '/workers/batch-converter.worker.js'
+        : '/workers/heic-converter.worker.js';
+
     const worker = new Worker(workerPath, { type: 'module' });
-    
+
     worker.metadata = {
       type,
       busy: false,
       taskId: null,
-      created: Date.now()
+      created: Date.now(),
     };
 
     // Set up worker message handlers
@@ -79,12 +80,12 @@ export class ConversionQueue {
    */
   getAvailableWorker(type) {
     const pool = type === 'batch' ? this.batchWorkerPool : this.workerPool;
-    let worker = pool.find(w => !w.metadata.busy);
-    
+    let worker = pool.find((w) => !w.metadata.busy);
+
     if (!worker && pool.length < this.maxWorkers) {
       worker = this.createWorker(type);
     }
-    
+
     return worker;
   }
 
@@ -93,7 +94,7 @@ export class ConversionQueue {
    */
   async addFile(file, options = {}) {
     const taskId = this.generateTaskId();
-    
+
     const task = {
       id: taskId,
       type: 'single',
@@ -101,23 +102,23 @@ export class ConversionQueue {
       options: {
         targetType: options.targetType || 'jpeg',
         quality: options.quality || 90,
-        ...options
+        ...options,
       },
       retries: 0,
       status: 'queued',
-      addedAt: Date.now()
+      addedAt: Date.now(),
     };
 
     // Register with progress tracker
     this.progressTracker.createTask(taskId, {
       fileName: file.name,
       fileSize: file.size,
-      type: 'single'
+      type: 'single',
     });
 
     this.queue.push(task);
     this.processQueue();
-    
+
     return taskId;
   }
 
@@ -126,7 +127,7 @@ export class ConversionQueue {
    */
   async addBatch(files, options = {}) {
     const taskId = this.generateTaskId();
-    
+
     const task = {
       id: taskId,
       type: 'batch',
@@ -134,23 +135,23 @@ export class ConversionQueue {
       options: {
         targetType: options.targetType || 'jpeg',
         quality: options.quality || 90,
-        ...options
+        ...options,
       },
       retries: 0,
       status: 'queued',
-      addedAt: Date.now()
+      addedAt: Date.now(),
     };
 
     // Register batch with progress tracker
     this.progressTracker.createTask(taskId, {
       fileCount: files.length,
       totalSize: files.reduce((sum, f) => sum + f.size, 0),
-      type: 'batch'
+      type: 'batch',
     });
 
     this.queue.push(task);
     this.processQueue();
-    
+
     return taskId;
   }
 
@@ -158,13 +159,16 @@ export class ConversionQueue {
    * Process the queue
    */
   async processQueue() {
-    while (this.queue.length > 0 && this.activeWorkers.size < this.maxConcurrent) {
+    while (
+      this.queue.length > 0 &&
+      this.activeWorkers.size < this.maxConcurrent
+    ) {
       const task = this.queue.shift();
-      
+
       if (!task) break;
-      
+
       const worker = this.getAvailableWorker(task.type);
-      
+
       if (!worker) {
         // Put task back in queue if no worker available
         this.queue.unshift(task);
@@ -193,14 +197,14 @@ export class ConversionQueue {
           type: 'convert-batch',
           files: task.files,
           targetType: task.options.targetType,
-          quality: task.options.quality
+          quality: task.options.quality,
         });
       } else {
         worker.postMessage({
           type: 'convert',
           file: task.file,
           targetType: task.options.targetType,
-          quality: task.options.quality
+          quality: task.options.quality,
         });
       }
     } catch (error) {
@@ -214,31 +218,31 @@ export class ConversionQueue {
   handleWorkerMessage(worker, event) {
     const { type } = event.data;
     const activeTask = this.activeWorkers.get(worker.metadata.taskId);
-    
+
     if (!activeTask) return;
 
     switch (type) {
       case 'progress':
         this.handleProgress(activeTask.task, event.data);
         break;
-      
+
       case 'batch-progress':
         this.handleBatchProgress(activeTask.task, event.data);
         break;
-      
+
       case 'success':
         this.handleSuccess(activeTask.task, event.data);
         break;
-      
+
       case 'batch-complete':
         this.handleBatchComplete(activeTask.task, event.data);
         break;
-      
+
       case 'cancelled':
       case 'batch-cancelled':
         this.handleCancellation(activeTask.task, event.data);
         break;
-      
+
       case 'error':
       case 'batch-error':
         this.handleTaskError(activeTask.task, new Error(event.data.error));
@@ -251,10 +255,10 @@ export class ConversionQueue {
    */
   handleProgress(task, data) {
     const { progress, stage, message } = data;
-    
+
     this.progressTracker.updateProgress(task.id, progress, message, {
       stage,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     this.emit('progress', {
@@ -262,7 +266,7 @@ export class ConversionQueue {
       progress,
       stage,
       message,
-      fileName: task.file?.name
+      fileName: task.file?.name,
     });
   }
 
@@ -271,10 +275,10 @@ export class ConversionQueue {
    */
   handleBatchProgress(task, data) {
     const { progress, currentFile, message, details } = data;
-    
+
     this.progressTracker.updateProgress(task.id, progress, message, {
       currentFile,
-      ...details
+      ...details,
     });
 
     this.emit('progress', {
@@ -282,7 +286,7 @@ export class ConversionQueue {
       progress,
       currentFile,
       message,
-      details
+      details,
     });
   }
 
@@ -291,21 +295,21 @@ export class ConversionQueue {
    */
   handleSuccess(task, data) {
     const { result, metadata } = data;
-    
+
     // Complete task in progress tracker
     this.progressTracker.completeTask(task.id);
-    
+
     // Clean up worker
     this.releaseWorker(task.id);
-    
+
     // Emit complete event
     this.emit('complete', {
       taskId: task.id,
       result,
       metadata,
-      fileName: task.file?.name
+      fileName: task.file?.name,
     });
-    
+
     // Process next item in queue
     this.processQueue();
   }
@@ -315,22 +319,22 @@ export class ConversionQueue {
    */
   handleBatchComplete(task, data) {
     const { results, errors, summary } = data;
-    
+
     // Complete task in progress tracker
     this.progressTracker.completeTask(task.id);
-    
+
     // Clean up worker
     this.releaseWorker(task.id);
-    
+
     // Emit complete event
     this.emit('complete', {
       taskId: task.id,
       results,
       errors,
       summary,
-      type: 'batch'
+      type: 'batch',
     });
-    
+
     // Process next item in queue
     this.processQueue();
   }
@@ -341,13 +345,13 @@ export class ConversionQueue {
   handleCancellation(task, data) {
     this.progressTracker.cancelTask(task.id);
     this.releaseWorker(task.id);
-    
+
     this.emit('cancelled', {
       taskId: task.id,
       message: data.message,
-      fileName: task.file?.name
+      fileName: task.file?.name,
     });
-    
+
     this.processQueue();
   }
 
@@ -356,7 +360,7 @@ export class ConversionQueue {
    */
   handleTaskError(task, error) {
     task.retries++;
-    
+
     if (task.retries < this.maxRetries) {
       // Retry the task
       setTimeout(() => {
@@ -364,23 +368,23 @@ export class ConversionQueue {
         this.queue.unshift(task);
         this.processQueue();
       }, this.retryDelay * task.retries);
-      
+
       this.progressTracker.updateProgress(
-        task.id, 
-        0, 
+        task.id,
+        0,
         `Retrying... (Attempt ${task.retries + 1}/${this.maxRetries})`
       );
     } else {
       // Max retries reached
       this.progressTracker.failTask(task.id, error.message);
       this.releaseWorker(task.id);
-      
+
       this.emit('error', {
         taskId: task.id,
         error: error.message,
-        fileName: task.file?.name
+        fileName: task.file?.name,
       });
-      
+
       this.processQueue();
     }
   }
@@ -390,13 +394,13 @@ export class ConversionQueue {
    */
   handleWorkerError(worker, error) {
     console.error('Worker error:', error);
-    
+
     const taskId = worker.metadata.taskId;
     if (taskId && this.activeWorkers.has(taskId)) {
       const { task } = this.activeWorkers.get(taskId);
       this.handleTaskError(task, new Error('Worker crashed'));
     }
-    
+
     // Replace crashed worker
     this.replaceWorker(worker);
   }
@@ -420,7 +424,7 @@ export class ConversionQueue {
     const type = worker.metadata.type;
     const pool = type === 'batch' ? this.batchWorkerPool : this.workerPool;
     const index = pool.indexOf(worker);
-    
+
     if (index !== -1) {
       worker.terminate();
       pool.splice(index, 1);
@@ -433,14 +437,14 @@ export class ConversionQueue {
    */
   cancelTask(taskId) {
     // Check if task is in queue
-    const queueIndex = this.queue.findIndex(t => t.id === taskId);
+    const queueIndex = this.queue.findIndex((t) => t.id === taskId);
     if (queueIndex !== -1) {
       const task = this.queue.splice(queueIndex, 1)[0];
       this.progressTracker.cancelTask(taskId);
       this.emit('cancelled', {
         taskId,
         message: 'Task cancelled',
-        fileName: task.file?.name
+        fileName: task.file?.name,
       });
       return true;
     }
@@ -468,7 +472,7 @@ export class ConversionQueue {
       this.emit('cancelled', {
         taskId: task.id,
         message: 'All tasks cancelled',
-        fileName: task.file?.name
+        fileName: task.file?.name,
       });
     }
 
@@ -495,9 +499,9 @@ export class ConversionQueue {
       active: this.activeWorkers.size,
       progress: this.progressTracker.getOverallProgress(),
       workers: {
-        single: this.workerPool.filter(w => !w.metadata.busy).length,
-        batch: this.batchWorkerPool.filter(w => !w.metadata.busy).length
-      }
+        single: this.workerPool.filter((w) => !w.metadata.busy).length,
+        batch: this.batchWorkerPool.filter((w) => !w.metadata.busy).length,
+      },
     };
   }
 
@@ -527,7 +531,7 @@ export class ConversionQueue {
    */
   emit(event, data) {
     if (this.eventHandlers[event]) {
-      this.eventHandlers[event].forEach(handler => handler(data));
+      this.eventHandlers[event].forEach((handler) => handler(data));
     }
   }
 
@@ -543,12 +547,12 @@ export class ConversionQueue {
    */
   destroy() {
     this.cancelAll();
-    
+
     // Terminate all workers
-    [...this.workerPool, ...this.batchWorkerPool].forEach(worker => {
+    [...this.workerPool, ...this.batchWorkerPool].forEach((worker) => {
       worker.terminate();
     });
-    
+
     this.workerPool = [];
     this.batchWorkerPool = [];
     this.activeWorkers.clear();
@@ -560,5 +564,5 @@ export class ConversionQueue {
 export const conversionQueue = new ConversionQueue({
   maxConcurrent: 2,
   maxWorkers: 4,
-  maxRetries: 3
+  maxRetries: 3,
 });

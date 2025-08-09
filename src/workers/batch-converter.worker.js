@@ -13,13 +13,13 @@ let batchState = {
   results: [],
   errors: [],
   startTime: null,
-  filesProcessed: 0
+  filesProcessed: 0,
 };
 
 // Calculate overall progress based on file progress
 function calculateBatchProgress(fileIndex, fileProgress) {
   const baseProgress = (fileIndex / batchState.totalFiles) * 100;
-  const fileContribution = (fileProgress / batchState.totalFiles);
+  const fileContribution = fileProgress / batchState.totalFiles;
   return Math.min(100, baseProgress + fileContribution);
 }
 
@@ -35,27 +35,27 @@ function sendProgress(progress, currentFile, message, details = {}) {
       filesProcessed: batchState.filesProcessed,
       totalFiles: batchState.totalFiles,
       elapsedTime: Date.now() - batchState.startTime,
-      estimatedTimeRemaining: calculateEstimatedTimeRemaining()
+      estimatedTimeRemaining: calculateEstimatedTimeRemaining(),
     },
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
 // Calculate estimated time remaining
 function calculateEstimatedTimeRemaining() {
   if (batchState.filesProcessed === 0) return null;
-  
+
   const elapsedTime = Date.now() - batchState.startTime;
   const averageTimePerFile = elapsedTime / batchState.filesProcessed;
   const filesRemaining = batchState.totalFiles - batchState.filesProcessed;
-  
+
   return Math.round(averageTimePerFile * filesRemaining);
 }
 
 // Convert a single file with progress tracking
 async function convertSingleFile(file, targetType, quality, fileIndex) {
   const fileName = file.name;
-  
+
   try {
     // Report file start
     sendProgress(
@@ -71,7 +71,7 @@ async function convertSingleFile(file, targetType, quality, fileIndex) {
     }
 
     // Simulate loading phase
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
     sendProgress(
       calculateBatchProgress(fileIndex, 20),
       fileName,
@@ -112,11 +112,11 @@ async function convertSingleFile(file, targetType, quality, fileIndex) {
       { stage: 'encoding' }
     );
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     // Create blob
     const blob = new Blob([result], {
-      type: targetType === 'jpeg' ? 'image/jpeg' : 'image/png'
+      type: targetType === 'jpeg' ? 'image/jpeg' : 'image/png',
     });
 
     // Finalizing
@@ -146,20 +146,19 @@ async function convertSingleFile(file, targetType, quality, fileIndex) {
         convertedSize: blob.size,
         compressionRatio: ((1 - blob.size / file.size) * 100).toFixed(2),
         format: targetType,
-        quality: quality || (targetType === 'jpeg' ? 90 : 100)
-      }
+        quality: quality || (targetType === 'jpeg' ? 90 : 100),
+      },
     };
-
   } catch (error) {
     batchState.errors.push({
       fileName,
-      error: error.message
+      error: error.message,
     });
 
     return {
       success: false,
       fileName,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -175,7 +174,7 @@ self.onmessage = async function (e) {
       type: 'batch-cancelled',
       message: 'Batch conversion cancelled by user',
       results: batchState.results,
-      errors: batchState.errors
+      errors: batchState.errors,
     });
     return;
   }
@@ -183,7 +182,7 @@ self.onmessage = async function (e) {
   // Handle batch conversion request
   if (type === 'convert-batch') {
     const { files, targetType, quality } = e.data;
-    
+
     // Reset batch state
     batchState = {
       isCancelled: false,
@@ -192,12 +191,12 @@ self.onmessage = async function (e) {
       results: [],
       errors: [],
       startTime: Date.now(),
-      filesProcessed: 0
+      filesProcessed: 0,
     };
 
     // Send initial progress
     sendProgress(0, '', `Starting batch conversion of ${files.length} files`, {
-      stage: 'initializing'
+      stage: 'initializing',
     });
 
     // Process files sequentially
@@ -208,7 +207,7 @@ self.onmessage = async function (e) {
 
       batchState.currentFileIndex = i;
       const result = await convertSingleFile(files[i], targetType, quality, i);
-      
+
       if (result.success) {
         batchState.results.push(result);
       }
@@ -217,7 +216,7 @@ self.onmessage = async function (e) {
     // Send completion message
     if (!batchState.isCancelled) {
       sendProgress(100, '', 'Batch conversion complete', {
-        stage: 'complete'
+        stage: 'complete',
       });
 
       self.postMessage({
@@ -228,18 +227,18 @@ self.onmessage = async function (e) {
           totalFiles: batchState.totalFiles,
           successCount: batchState.results.length,
           errorCount: batchState.errors.length,
-          totalTime: Date.now() - batchState.startTime
-        }
+          totalTime: Date.now() - batchState.startTime,
+        },
       });
     }
   }
 };
 
 // Handle worker errors
-self.onerror = function(error) {
+self.onerror = function (error) {
   console.error('Batch worker error:', error);
   self.postMessage({
     type: 'batch-error',
-    error: 'Batch worker error: ' + error.message
+    error: 'Batch worker error: ' + error.message,
   });
 };
