@@ -473,7 +473,7 @@ export class ConversionQueue {
     }
 
     // Cancel active tasks
-    for (const [_taskId, { worker, task }] of this.activeWorkers) {
+    for (const [, { worker, task }] of this.activeWorkers) {
       const cancelType = task.type === 'batch' ? 'cancel-batch' : 'cancel';
       worker.postMessage({ type: cancelType });
     }
