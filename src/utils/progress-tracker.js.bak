@@ -1,7 +1,7 @@
 // Progress Tracker for HEIC Converter
 // Tracks conversion progress with detailed statistics and event handling
 
-export class ProgressTracker {
+class ProgressTracker {
   constructor() {
     this.listeners = new Map();
     this.tasks = new Map(); // Individual task tracking
