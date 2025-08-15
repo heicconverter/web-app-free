@@ -28,7 +28,7 @@ export default function TestProgressPage() {
   }>({
     queued: 0,
     active: 0,
-    progress: { 
+    progress: {
       fileProgressPercent: 0,
       byteProgressPercent: 0,
       processedFiles: 0,
@@ -36,13 +36,13 @@ export default function TestProgressPage() {
       processedBytes: 0,
       totalBytes: 0,
       throughputBytesPerSecond: 0,
-      estimatedTimeRemaining: null
-    }
+      estimatedTimeRemaining: null,
+    },
   });
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
   };
 
   const updateQueueStatus = useCallback(() => {
@@ -61,35 +61,37 @@ export default function TestProgressPage() {
     addLog('🚀 Starting basic progress test...');
     const testFiles = 3;
     const testFileSize = 2 * 1024 * 1024; // 2MB each
-    
+
     // Start tracking multiple files
     progressTracker.startTracking(testFiles, testFiles * testFileSize);
     setCurrentTaskId('batch-test');
-    
+
     // Simulate processing files
     for (let fileIndex = 0; fileIndex < testFiles; fileIndex++) {
       addLog(`📂 Processing file ${fileIndex + 1}/${testFiles}...`);
-      
+
       const stages = [
         { progress: 20, message: '🔍 Analyzing HEIC...' },
         { progress: 40, message: '🎨 Decoding image...' },
         { progress: 70, message: '🖼️ Encoding to JPEG...' },
-        { progress: 100, message: '✅ File complete!' }
+        { progress: 100, message: '✅ File complete!' },
       ];
-      
+
       for (const stage of stages) {
-        await new Promise(resolve => setTimeout(resolve, 400));
+        await new Promise((resolve) => setTimeout(resolve, 400));
         progressTracker.updateFileProgress(testFileSize, stage.progress);
         addLog(`File ${fileIndex + 1}: ${stage.progress}% - ${stage.message}`);
-        
+
         const overall = progressTracker.getProgress();
-        addLog(`Overall: ${Math.round(overall.fileProgressPercent)}% files, ${Math.round(overall.byteProgressPercent)}% data`);
+        addLog(
+          `Overall: ${Math.round(overall.fileProgressPercent)}% files, ${Math.round(overall.byteProgressPercent)}% data`
+        );
       }
-      
+
       progressTracker.completeFile();
       addLog(`✅ File ${fileIndex + 1} completed successfully!`);
     }
-    
+
     progressTracker.finish();
     addLog('🎉 All files processed!');
     setCurrentTaskId(null);
@@ -98,30 +100,38 @@ export default function TestProgressPage() {
   // Test 2: Queue System
   const testQueueSystem = async () => {
     addLog('📋 Testing queue system...');
-    
+
     // Set up event listeners
-    const progressHandler = (data: { taskId: string; progress: number; message: string }) => {
-      addLog(`📊 Progress [${data.taskId.slice(-6)}]: ${Math.round(data.progress)}% - ${data.message}`);
+    const progressHandler = (data: {
+      taskId: string;
+      progress: number;
+      message: string;
+    }) => {
+      addLog(
+        `📊 Progress [${data.taskId.slice(-6)}]: ${Math.round(data.progress)}% - ${data.message}`
+      );
     };
-    
+
     const completeHandler = (data: { taskId: string; fileName?: string }) => {
-      addLog(`✅ Task completed [${data.taskId.slice(-6)}]: ${data.fileName || 'Unknown file'}`);
+      addLog(
+        `✅ Task completed [${data.taskId.slice(-6)}]: ${data.fileName || 'Unknown file'}`
+      );
     };
-    
+
     const errorHandler = (data: { taskId: string; error: string }) => {
       addLog(`❌ Task failed [${data.taskId.slice(-6)}]: ${data.error}`);
     };
-    
+
     const cancelledHandler = (data: { taskId: string; message: string }) => {
       addLog(`🚫 Task cancelled [${data.taskId.slice(-6)}]: ${data.message}`);
     };
-    
+
     // Register event listeners
     queue.on('progress', progressHandler);
     queue.on('complete', completeHandler);
     queue.on('error', errorHandler);
     queue.on('cancelled', cancelledHandler);
-    
+
     // Create simulated files
     const taskIds = [];
     for (let i = 0; i < 3; i++) {
@@ -130,16 +140,16 @@ export default function TestProgressPage() {
         `test-${i + 1}.heic`,
         { type: 'image/heic' }
       );
-      
+
       const taskId = await queue.addFile(file, {
         targetType: 'jpeg',
-        quality: 90
+        quality: 90,
       });
-      
+
       taskIds.push(taskId);
       addLog(`➕ Added task ${i + 1} to queue (ID: ${taskId.slice(-6)}...)`);
     }
-    
+
     // Clean up listeners after 30 seconds or when all tasks complete
     setTimeout(() => {
       queue.off('progress', progressHandler);
@@ -148,49 +158,51 @@ export default function TestProgressPage() {
       queue.off('cancelled', cancelledHandler);
       addLog('🧹 Cleaned up queue listeners');
     }, 30000);
-    
+
     return taskIds;
   };
 
   // Test 3: Cancellation
   const testCancellation = async () => {
     addLog('🛑 Testing cancellation...');
-    
+
     // Create a test file for cancellation
     const testFile = new File(
       [new ArrayBuffer(10 * 1024 * 1024)], // 10MB file
       'large-test-file.heic',
       { type: 'image/heic' }
     );
-    
+
     // Set up cancellation listener
     const cancelHandler = (data: { taskId: string; message: string }) => {
       addLog(`🚫 Task was cancelled: ${data.message}`);
       setCurrentTaskId(null);
     };
-    
+
     queue.on('cancelled', cancelHandler);
-    
+
     // Add file to queue
     const taskId = await queue.addFile(testFile, {
       targetType: 'jpeg',
-      quality: 90
+      quality: 90,
     });
-    
+
     setCurrentTaskId(taskId);
     addLog(`➕ Added cancellation test file (ID: ${taskId.slice(-6)}...)`);
-    
+
     // Wait 2 seconds then cancel
     setTimeout(() => {
       const success = queue.cancelTask(taskId);
       if (success) {
         addLog(`🛑 Initiated cancellation for task ${taskId.slice(-6)}...`);
       } else {
-        addLog(`❌ Failed to cancel task ${taskId.slice(-6)}... (may have already completed)`);
+        addLog(
+          `❌ Failed to cancel task ${taskId.slice(-6)}... (may have already completed)`
+        );
         setCurrentTaskId(null);
       }
     }, 2000);
-    
+
     // Clean up listener after 10 seconds
     setTimeout(() => {
       queue.off('cancelled', cancelHandler);
@@ -201,27 +213,31 @@ export default function TestProgressPage() {
   // Test 4: Error Handling
   const testErrorHandling = async () => {
     addLog('💥 Testing error handling...');
-    
+
     // Create an invalid file to trigger error
     const invalidFile = new File(
       [new ArrayBuffer(100)], // Too small to be a valid HEIC
       'invalid-file.heic',
       { type: 'image/heic' }
     );
-    
+
     const errorHandler = (data: { taskId: string; error: string }) => {
-      addLog(`❌ Error caught: ${data.error} (Task: ${data.taskId.slice(-6)}...)`);
+      addLog(
+        `❌ Error caught: ${data.error} (Task: ${data.taskId.slice(-6)}...)`
+      );
     };
-    
+
     queue.on('error', errorHandler);
-    
+
     const taskId = await queue.addFile(invalidFile, {
       targetType: 'jpeg',
-      quality: 90
+      quality: 90,
     });
-    
-    addLog(`➕ Added invalid file to test error handling (ID: ${taskId.slice(-6)}...)`);
-    
+
+    addLog(
+      `➕ Added invalid file to test error handling (ID: ${taskId.slice(-6)}...)`
+    );
+
     // Clean up listener after 15 seconds
     setTimeout(() => {
       queue.off('error', errorHandler);
@@ -232,32 +248,42 @@ export default function TestProgressPage() {
   // Test 5: Batch Conversion
   const testBatchConversion = async () => {
     addLog('📦 Testing batch conversion...');
-    
+
     // Create multiple files for batch processing
     const files = [];
     for (let i = 0; i < 5; i++) {
-      files.push(new File(
-        [new ArrayBuffer(1024 * 200)], // 200KB each
-        `batch-file-${i + 1}.heic`,
-        { type: 'image/heic' }
-      ));
+      files.push(
+        new File(
+          [new ArrayBuffer(1024 * 200)], // 200KB each
+          `batch-file-${i + 1}.heic`,
+          { type: 'image/heic' }
+        )
+      );
     }
-    
-    const batchHandler = (data: { type: string; results?: unknown[]; errors?: unknown[] }) => {
+
+    const batchHandler = (data: {
+      type: string;
+      results?: unknown[];
+      errors?: unknown[];
+    }) => {
       if (data.type === 'batch') {
-        addLog(`📦 Batch completed: ${data.results?.length || 0} files processed, ${data.errors?.length || 0} errors`);
+        addLog(
+          `📦 Batch completed: ${data.results?.length || 0} files processed, ${data.errors?.length || 0} errors`
+        );
       }
     };
-    
+
     queue.on('complete', batchHandler);
-    
+
     const batchId = await queue.addBatch(files, {
       targetType: 'jpeg',
-      quality: 85
+      quality: 85,
     });
-    
-    addLog(`➕ Added batch of ${files.length} files (ID: ${batchId.slice(-6)}...)`);
-    
+
+    addLog(
+      `➕ Added batch of ${files.length} files (ID: ${batchId.slice(-6)}...)`
+    );
+
     // Clean up listener after 30 seconds
     setTimeout(() => {
       queue.off('complete', batchHandler);
@@ -282,10 +308,10 @@ export default function TestProgressPage() {
     setQueueStatus({
       queued: 0,
       active: 0,
-      progress: { 
+      progress: {
         fileProgressPercent: 0,
-        byteProgressPercent: 0
-      }
+        byteProgressPercent: 0,
+      },
     });
     addLog('✅ System reset complete');
   };
@@ -302,12 +328,12 @@ export default function TestProgressPage() {
         <h1 className="text-4xl font-bold text-white mb-8 flex items-center gap-3">
           🚀 Progress Tracking Test Suite
         </h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Test Controls */}
           <div className="bg-white rounded-lg shadow-xl p-6">
             <h2 className="text-xl font-semibold mb-4">Test Controls</h2>
-            
+
             <div className="space-y-3">
               <button
                 onClick={testBasicProgress}
@@ -315,35 +341,35 @@ export default function TestProgressPage() {
               >
                 ▶️ Test Basic Progress
               </button>
-              
+
               <button
                 onClick={testQueueSystem}
                 className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
               >
                 📋 Test Queue System
               </button>
-              
+
               <button
                 onClick={testCancellation}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
               >
                 🛑 Test Cancellation
               </button>
-              
+
               <button
                 onClick={testErrorHandling}
                 className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
               >
                 💥 Test Error Handling
               </button>
-              
+
               <button
                 onClick={testBatchConversion}
                 className="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
               >
                 📦 Test Batch Conversion
               </button>
-              
+
               <div className="border-t pt-3 mt-3">
                 <button
                   onClick={cancelAllTasks}
@@ -351,14 +377,14 @@ export default function TestProgressPage() {
                 >
                   🛑 Cancel All Tasks
                 </button>
-                
+
                 <button
                   onClick={resetSystem}
                   className="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded mb-2"
                 >
                   🔄 Reset System
                 </button>
-                
+
                 <button
                   onClick={clearLogs}
                   className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
@@ -367,40 +393,46 @@ export default function TestProgressPage() {
                 </button>
               </div>
             </div>
-            
+
             {currentTaskId && (
               <div className="mt-4 p-3 bg-blue-50 rounded">
                 <p className="text-sm">Active Task: {currentTaskId}</p>
               </div>
             )}
           </div>
-          
+
           {/* Logs Display */}
           <div className="bg-white rounded-lg shadow-xl p-6">
             <h2 className="text-xl font-semibold mb-4">Test Logs</h2>
-            
+
             <div className="bg-gray-900 text-green-400 p-4 rounded h-96 overflow-y-auto font-mono text-sm">
               {logs.length === 0 ? (
                 <div className="text-gray-500">Ready to test...</div>
               ) : (
                 logs.map((log, i) => (
-                  <div key={i} className="mb-1">{log}</div>
+                  <div key={i} className="mb-1">
+                    {log}
+                  </div>
                 ))
               )}
             </div>
           </div>
         </div>
-        
+
         {/* Queue Status */}
         <div className="mt-6 bg-white rounded-lg shadow-xl p-6">
           <h2 className="text-xl font-semibold mb-4">System Status</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 bg-blue-50 rounded">
-              <div className="text-2xl font-bold text-blue-600">{queueStatus.queued}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {queueStatus.queued}
+              </div>
               <div className="text-sm text-gray-600">Queued</div>
             </div>
             <div className="text-center p-3 bg-green-50 rounded">
-              <div className="text-2xl font-bold text-green-600">{queueStatus.active}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {queueStatus.active}
+              </div>
               <div className="text-sm text-gray-600">Active</div>
             </div>
             <div className="text-center p-3 bg-purple-50 rounded">
@@ -416,32 +448,39 @@ export default function TestProgressPage() {
               <div className="text-sm text-gray-600">Data Progress</div>
             </div>
           </div>
-          
+
           {/* Additional Stats */}
           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="bg-gray-50 p-3 rounded">
               <div className="font-medium">Processed Files</div>
               <div className="text-gray-600">
-                {queueStatus.progress.processedFiles || 0} / {queueStatus.progress.totalFiles || 0}
+                {queueStatus.progress.processedFiles || 0} /{' '}
+                {queueStatus.progress.totalFiles || 0}
               </div>
             </div>
             <div className="bg-gray-50 p-3 rounded">
               <div className="font-medium">Data Processed</div>
               <div className="text-gray-600">
-                {formatBytes(queueStatus.progress.processedBytes || 0)} / {formatBytes(queueStatus.progress.totalBytes || 0)}
+                {formatBytes(queueStatus.progress.processedBytes || 0)} /{' '}
+                {formatBytes(queueStatus.progress.totalBytes || 0)}
               </div>
             </div>
             <div className="bg-gray-50 p-3 rounded">
               <div className="font-medium">Throughput</div>
               <div className="text-gray-600">
-                {formatBytes(queueStatus.progress.throughputBytesPerSecond || 0)}/s
+                {formatBytes(
+                  queueStatus.progress.throughputBytesPerSecond || 0
+                )}
+                /s
               </div>
             </div>
           </div>
-          
+
           {queueStatus.progress.estimatedTimeRemaining && (
             <div className="mt-3 p-3 bg-yellow-50 rounded">
-              <div className="font-medium text-yellow-800">Estimated Time Remaining</div>
+              <div className="font-medium text-yellow-800">
+                Estimated Time Remaining
+              </div>
               <div className="text-yellow-600">
                 {formatTime(queueStatus.progress.estimatedTimeRemaining)}
               </div>

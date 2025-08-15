@@ -62,7 +62,7 @@ export class ConversionQueue {
     try {
       // Pre-create minimal workers for better performance
       const initialWorkers = Math.min(2, this.maxWorkers);
-      
+
       for (let i = 0; i < initialWorkers; i++) {
         try {
           this.createWorker('single');
@@ -70,7 +70,7 @@ export class ConversionQueue {
           console.warn(`Failed to create single worker ${i}:`, error.message);
           this.failedWorkerCreations++;
         }
-        
+
         try {
           this.createWorker('batch');
         } catch (error) {
@@ -78,19 +78,21 @@ export class ConversionQueue {
           this.failedWorkerCreations++;
         }
       }
-      
+
       if (this.failedWorkerCreations >= this.maxWorkerFailures) {
-        console.error('Too many worker creation failures. Queue may not function properly.');
+        console.error(
+          'Too many worker creation failures. Queue may not function properly.'
+        );
         this.emit('workerError', {
           message: 'Worker pool initialization failed',
-          failures: this.failedWorkerCreations
+          failures: this.failedWorkerCreations,
         });
       }
     } catch (error) {
       console.error('Failed to initialize worker pools:', error);
       this.emit('workerError', {
         message: 'Worker pool initialization error',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -118,7 +120,7 @@ export class ConversionQueue {
     } catch (error) {
       console.error(`Failed to create ${type} worker:`, error);
       this.failedWorkerCreations++;
-      
+
       // Create a mock worker for testing purposes if actual workers fail
       if (this.failedWorkerCreations >= this.maxWorkerFailures) {
         worker = this.createMockWorker(type);
@@ -157,7 +159,7 @@ export class ConversionQueue {
       type,
       postMessage: (data) => {
         console.warn(`Mock ${type} worker received message:`, data);
-        
+
         // Simulate worker response with delay
         setTimeout(() => {
           if (data.type === 'convert' || data.type === 'convert-batch') {
@@ -165,8 +167,8 @@ export class ConversionQueue {
             this.handleWorkerMessage(mockWorker, {
               data: {
                 type: 'error',
-                error: 'Mock worker - real workers unavailable'
-              }
+                error: 'Mock worker - real workers unavailable',
+              },
             });
           }
         }, 100);
@@ -175,7 +177,7 @@ export class ConversionQueue {
         console.warn(`Mock ${type} worker terminated`);
       },
       onmessage: null,
-      onerror: null
+      onerror: null,
     };
 
     return mockWorker;
@@ -228,7 +230,9 @@ export class ConversionQueue {
     // Validate target type
     const validTargetTypes = ['jpeg', 'jpg', 'png', 'webp'];
     if (!validTargetTypes.includes(targetType.toLowerCase())) {
-      throw new Error(`Invalid target type: ${targetType}. Must be one of: ${validTargetTypes.join(', ')}`);
+      throw new Error(
+        `Invalid target type: ${targetType}. Must be one of: ${validTargetTypes.join(', ')}`
+      );
     }
 
     const task = {
@@ -257,10 +261,10 @@ export class ConversionQueue {
       });
 
       this.queue.push(task);
-      
+
       // Sort queue by priority (higher priority first)
       this.queue.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-      
+
       this.processQueue();
 
       return taskId;
@@ -316,11 +320,13 @@ export class ConversionQueue {
     // Validate target type
     const validTargetTypes = ['jpeg', 'jpg', 'png', 'webp'];
     if (!validTargetTypes.includes(targetType.toLowerCase())) {
-      throw new Error(`Invalid target type: ${targetType}. Must be one of: ${validTargetTypes.join(', ')}`);
+      throw new Error(
+        `Invalid target type: ${targetType}. Must be one of: ${validTargetTypes.join(', ')}`
+      );
     }
 
     const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-    
+
     const task = {
       id: taskId,
       type: 'batch',
@@ -344,14 +350,14 @@ export class ConversionQueue {
         type: 'batch',
         targetType: task.options.targetType,
         quality: task.options.quality,
-        files: files.map(f => ({ name: f.name, size: f.size })),
+        files: files.map((f) => ({ name: f.name, size: f.size })),
       });
 
       this.queue.push(task);
-      
+
       // Sort queue by priority (higher priority first)
       this.queue.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-      
+
       this.processQueue();
 
       return taskId;
@@ -430,7 +436,7 @@ export class ConversionQueue {
         queuedTasks: this.queue.length,
         activeTasks: this.activeWorkers.size,
       });
-      
+
       // Resume processing
       this.processQueue();
     }
@@ -447,11 +453,14 @@ export class ConversionQueue {
    * Get queue priority statistics
    */
   getQueuePriorities() {
-    const priorities = this.queue.map(task => task.priority || 0);
+    const priorities = this.queue.map((task) => task.priority || 0);
     return {
       min: Math.min(...priorities) || 0,
       max: Math.max(...priorities) || 0,
-      average: priorities.length > 0 ? priorities.reduce((sum, p) => sum + p, 0) / priorities.length : 0
+      average:
+        priorities.length > 0
+          ? priorities.reduce((sum, p) => sum + p, 0) / priorities.length
+          : 0,
     };
   }
 
@@ -662,7 +671,7 @@ export class ConversionQueue {
   handleCancellation(task, data) {
     // Update metrics
     this.metrics.totalTasksCancelled++;
-    
+
     this.progressTracker.cancelTask(task.id, data.message || 'Task cancelled');
     this.releaseWorker(task.id);
 
@@ -701,13 +710,13 @@ export class ConversionQueue {
     } else {
       // Max retries reached - update metrics
       this.metrics.totalTasksFailed++;
-      
+
       this.progressTracker.failTask(task.id, error.message, {
         retries: task.retries,
         lastError: error.message,
         failedAt: Date.now(),
       });
-      
+
       this.releaseWorker(task.id);
 
       this.emit('error', {
@@ -731,8 +740,9 @@ export class ConversionQueue {
       this.metrics.averageProcessingTime = newTime;
     } else {
       // Rolling average
-      this.metrics.averageProcessingTime = 
-        ((this.metrics.averageProcessingTime * (totalProcessed - 1)) + newTime) / totalProcessed;
+      this.metrics.averageProcessingTime =
+        (this.metrics.averageProcessingTime * (totalProcessed - 1) + newTime) /
+        totalProcessed;
     }
   }
 
@@ -741,9 +751,10 @@ export class ConversionQueue {
    */
   calculateWorkerUtilization() {
     const totalWorkers = this.workerPool.length + this.batchWorkerPool.length;
-    const busyWorkers = [...this.workerPool, ...this.batchWorkerPool]
-      .filter(worker => worker.metadata.busy).length;
-    
+    const busyWorkers = [...this.workerPool, ...this.batchWorkerPool].filter(
+      (worker) => worker.metadata.busy
+    ).length;
+
     return totalWorkers > 0 ? (busyWorkers / totalWorkers) * 100 : 0;
   }
 
@@ -752,15 +763,20 @@ export class ConversionQueue {
    */
   getMetrics() {
     const uptime = Date.now() - this.metrics.startTime;
-    
+
     return {
       ...this.metrics,
       uptime,
       workerUtilization: this.calculateWorkerUtilization(),
-      tasksPerSecond: uptime > 0 ? (this.metrics.totalTasksProcessed / (uptime / 1000)) : 0,
-      successRate: this.metrics.totalTasksProcessed > 0 
-        ? ((this.metrics.totalTasksProcessed - this.metrics.totalTasksFailed) / this.metrics.totalTasksProcessed) * 100 
-        : 0,
+      tasksPerSecond:
+        uptime > 0 ? this.metrics.totalTasksProcessed / (uptime / 1000) : 0,
+      successRate:
+        this.metrics.totalTasksProcessed > 0
+          ? ((this.metrics.totalTasksProcessed -
+              this.metrics.totalTasksFailed) /
+              this.metrics.totalTasksProcessed) *
+            100
+          : 0,
       queueLength: this.queue.length,
       activeTasks: this.activeWorkers.size,
       isPaused: this.isPaused,
@@ -772,19 +788,33 @@ export class ConversionQueue {
    * Handle worker errors
    */
   handleWorkerError(worker, error) {
-    console.log('DEBUG - Error type:', typeof error, 'Value:', error, 'Constructor:', error?.constructor?.name);
+    console.log(
+      'DEBUG - Error type:',
+      typeof error,
+      'Value:',
+      error,
+      'Constructor:',
+      error?.constructor?.name
+    );
     if (error instanceof Event) {
       console.error('Worker error: Event triggered', error.type);
       return;
     }
-    if (typeof error === "number" || Object.prototype.toString.call(error) === "[object Number]") {
+    if (
+      typeof error === 'number' ||
+      Object.prototype.toString.call(error) === '[object Number]'
+    ) {
       console.error(`Worker error code: ${error}`);
     } else if (typeof error === 'string') {
       console.error(`Worker error message: ${error}`);
     } else if (error instanceof Error) {
       console.error(`Worker error: ${error.message}\n${error.stack}`);
     } else {
-      console.error('Worker error (unknown type): ' + (error?.constructor?.name || typeof error), error);
+      console.error(
+        'Worker error (unknown type): ' +
+          (error?.constructor?.name || typeof error),
+        error
+      );
     }
 
     const taskId = worker.metadata.taskId;
@@ -888,7 +918,7 @@ export class ConversionQueue {
   getQueueStatus() {
     const overallProgress = this.progressTracker.getOverallProgress();
     const workerStats = this.getWorkerStats();
-    
+
     return {
       queued: this.queue.length,
       active: this.activeWorkers.size,
@@ -914,22 +944,24 @@ export class ConversionQueue {
   getWorkerStats() {
     const singleWorkers = this.workerPool;
     const batchWorkers = this.batchWorkerPool;
-    
+
     return {
       single: {
         total: singleWorkers.length,
-        available: singleWorkers.filter(w => !w.metadata.busy).length,
-        busy: singleWorkers.filter(w => w.metadata.busy).length,
-        mock: singleWorkers.filter(w => w.metadata.isMock).length,
+        available: singleWorkers.filter((w) => !w.metadata.busy).length,
+        busy: singleWorkers.filter((w) => w.metadata.busy).length,
+        mock: singleWorkers.filter((w) => w.metadata.isMock).length,
       },
       batch: {
         total: batchWorkers.length,
-        available: batchWorkers.filter(w => !w.metadata.busy).length,
-        busy: batchWorkers.filter(w => w.metadata.busy).length,
-        mock: batchWorkers.filter(w => w.metadata.isMock).length,
+        available: batchWorkers.filter((w) => !w.metadata.busy).length,
+        busy: batchWorkers.filter((w) => w.metadata.busy).length,
+        mock: batchWorkers.filter((w) => w.metadata.isMock).length,
       },
-      totalTasks: [...singleWorkers, ...batchWorkers]
-        .reduce((sum, w) => sum + (w.metadata.tasksProcessed || 0), 0),
+      totalTasks: [...singleWorkers, ...batchWorkers].reduce(
+        (sum, w) => sum + (w.metadata.tasksProcessed || 0),
+        0
+      ),
     };
   }
 
@@ -998,9 +1030,9 @@ export class ConversionQueue {
       this.batchWorkerPool = [];
       this.activeWorkers.clear();
       this.queue = [];
-      
+
       // Clear event handlers
-      Object.keys(this.eventHandlers).forEach(event => {
+      Object.keys(this.eventHandlers).forEach((event) => {
         this.eventHandlers[event] = [];
       });
 
@@ -1026,17 +1058,23 @@ export class ConversionQueue {
   getHealthStatus() {
     const status = this.getQueueStatus();
     const metrics = this.getMetrics();
-    
+
     return {
-      healthy: !this.isDestroyed && this.failedWorkerCreations < this.maxWorkerFailures,
+      healthy:
+        !this.isDestroyed &&
+        this.failedWorkerCreations < this.maxWorkerFailures,
       issues: [],
       recommendations: [],
       status: {
-        queue: this.isDestroyed ? 'destroyed' : this.isPaused ? 'paused' : 'active',
+        queue: this.isDestroyed
+          ? 'destroyed'
+          : this.isPaused
+            ? 'paused'
+            : 'active',
         workers: status.workers.single.total + status.workers.batch.total,
         utilization: metrics.workerUtilization,
         successRate: metrics.successRate,
-      }
+      },
     };
   }
 }

@@ -11,8 +11,8 @@ export default tseslint.config(
       'node_modules/**',
       '.next/**',
       'build/**',
-      'dist/**'
-    ]
+      'dist/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -20,8 +20,8 @@ export default tseslint.config(
   prettier,
   {
     files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
-    languageOptions: { 
-      globals: globals.browser 
+    languageOptions: {
+      globals: globals.browser,
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
@@ -32,5 +32,5 @@ export default tseslint.config(
         version: 'detect',
       },
     },
-  },
+  }
 );

@@ -9,6 +9,9 @@ out
 build
 dist
 
+# WASM and third-party files
+src/wasm/**
+
 # Misc
 .DS_Store
 *.pem

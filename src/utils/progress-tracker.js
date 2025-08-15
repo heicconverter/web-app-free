@@ -90,7 +90,7 @@ export class ProgressTracker {
     if (!taskId || typeof taskId !== 'string') {
       throw new Error('Task ID must be a non-empty string');
     }
-    
+
     if (this.tasks.has(taskId)) {
       throw new Error(`Task ${taskId} already exists`);
     }
@@ -110,18 +110,18 @@ export class ProgressTracker {
         type: metadata.type || 'single',
         fileCount: metadata.fileCount || 1,
         totalSize: metadata.totalSize || metadata.fileSize || 0,
-        ...metadata
+        ...metadata,
       },
       createdAt: Date.now(),
       startedAt: null,
       completedAt: null,
       lastUpdated: Date.now(),
-      history: []
+      history: [],
     };
 
     this.tasks.set(taskId, task);
     this.emitEvent('taskCreated', { taskId, task });
-    
+
     return task;
   }
 
@@ -144,12 +144,16 @@ export class ProgressTracker {
     }
 
     if (task.status === 'completed') {
-      console.warn(`Attempting to update progress for completed task ${taskId}`);
+      console.warn(
+        `Attempting to update progress for completed task ${taskId}`
+      );
       return task;
     }
 
     if (['failed', 'cancelled'].includes(task.status)) {
-      throw new Error(`Cannot update progress for ${task.status} task ${taskId}`);
+      throw new Error(
+        `Cannot update progress for ${task.status} task ${taskId}`
+      );
     }
 
     if (typeof message !== 'string') {
@@ -171,13 +175,13 @@ export class ProgressTracker {
     task.progress = progress;
     task.message = message;
     task.lastUpdated = Date.now();
-    
+
     // Add to history
     task.history.push({
       timestamp: Date.now(),
       progress,
       message,
-      ...additionalData
+      ...additionalData,
     });
 
     // Keep history limited to last 50 entries
@@ -185,11 +189,11 @@ export class ProgressTracker {
       task.history.shift();
     }
 
-    this.emitEvent('taskProgressUpdated', { 
-      taskId, 
-      task, 
+    this.emitEvent('taskProgressUpdated', {
+      taskId,
+      task,
       previousProgress,
-      progressDelta: progress - previousProgress
+      progressDelta: progress - previousProgress,
     });
 
     return task;
@@ -220,11 +224,11 @@ export class ProgressTracker {
       timestamp: Date.now(),
       progress: 100,
       message: 'Task completed',
-      status: 'completed'
+      status: 'completed',
     });
 
     this.emitEvent('taskCompleted', { taskId, task, result });
-    
+
     return task;
   }
 
@@ -256,11 +260,11 @@ export class ProgressTracker {
       timestamp: Date.now(),
       progress: task.progress,
       message: reason,
-      status: 'cancelled'
+      status: 'cancelled',
     });
 
     this.emitEvent('taskCancelled', { taskId, task, reason });
-    
+
     return task;
   }
 
@@ -301,11 +305,11 @@ export class ProgressTracker {
       message: `Failed: ${error}`,
       status: 'failed',
       error,
-      ...details
+      ...details,
     });
 
     this.emitEvent('taskFailed', { taskId, task, error, details });
-    
+
     return task;
   }
 
@@ -376,7 +380,9 @@ export class ProgressTracker {
     if (!task) return null;
 
     const elapsedTime = task.startedAt ? Date.now() - task.startedAt : 0;
-    const totalTime = task.completedAt ? task.completedAt - task.startedAt : elapsedTime;
+    const totalTime = task.completedAt
+      ? task.completedAt - task.startedAt
+      : elapsedTime;
 
     return {
       taskId,
@@ -393,12 +399,12 @@ export class ProgressTracker {
       isComplete: task.status === 'completed',
       isFailed: task.status === 'failed',
       isCancelled: task.status === 'cancelled',
-      isActive: task.status === 'in_progress'
+      isActive: task.status === 'in_progress',
     };
   }
 
   getAllTasks() {
-    return Array.from(this.tasks.values()).map(task => ({
+    return Array.from(this.tasks.values()).map((task) => ({
       taskId: task.id,
       progress: task.progress,
       status: task.status,
@@ -407,24 +413,24 @@ export class ProgressTracker {
       createdAt: task.createdAt,
       startedAt: task.startedAt,
       completedAt: task.completedAt,
-      lastUpdated: task.lastUpdated
+      lastUpdated: task.lastUpdated,
     }));
   }
 
   getActiveTasks() {
-    return this.getAllTasks().filter(task => task.status === 'in_progress');
+    return this.getAllTasks().filter((task) => task.status === 'in_progress');
   }
 
   getCompletedTasks() {
-    return this.getAllTasks().filter(task => task.status === 'completed');
+    return this.getAllTasks().filter((task) => task.status === 'completed');
   }
 
   getFailedTasks() {
-    return this.getAllTasks().filter(task => task.status === 'failed');
+    return this.getAllTasks().filter((task) => task.status === 'failed');
   }
 
   getCancelledTasks() {
-    return this.getAllTasks().filter(task => task.status === 'cancelled');
+    return this.getAllTasks().filter((task) => task.status === 'cancelled');
   }
 
   getOverallProgress() {
@@ -437,15 +443,15 @@ export class ProgressTracker {
         failedTasks: 0,
         cancelledTasks: 0,
         overallProgress: 0,
-        averageProgress: 0
+        averageProgress: 0,
       };
     }
 
-    const completed = tasks.filter(t => t.status === 'completed').length;
-    const active = tasks.filter(t => t.status === 'in_progress').length;
-    const failed = tasks.filter(t => t.status === 'failed').length;
-    const cancelled = tasks.filter(t => t.status === 'cancelled').length;
-    
+    const completed = tasks.filter((t) => t.status === 'completed').length;
+    const active = tasks.filter((t) => t.status === 'in_progress').length;
+    const failed = tasks.filter((t) => t.status === 'failed').length;
+    const cancelled = tasks.filter((t) => t.status === 'cancelled').length;
+
     const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
     const averageProgress = totalProgress / tasks.length;
     const overallProgress = (completed / tasks.length) * 100;
@@ -458,7 +464,7 @@ export class ProgressTracker {
       cancelledTasks: cancelled,
       overallProgress: Math.round(overallProgress * 100) / 100,
       averageProgress: Math.round(averageProgress * 100) / 100,
-      ...this.getProgress() // Include legacy stats
+      ...this.getProgress(), // Include legacy stats
     };
   }
 
@@ -524,17 +530,17 @@ export class ProgressTracker {
       task.status = 'paused';
       task.pausedAt = Date.now();
       task.message = 'Task paused';
-      
+
       task.history.push({
         timestamp: Date.now(),
         progress: task.progress,
         message: 'Task paused',
-        status: 'paused'
+        status: 'paused',
       });
 
       this.emitEvent('taskPaused', { taskId, task });
     }
-    
+
     return task;
   }
 
@@ -552,23 +558,23 @@ export class ProgressTracker {
       task.status = 'in_progress';
       task.resumedAt = Date.now();
       task.message = 'Task resumed';
-      
+
       // Add pause duration to total pause time
       if (!task.totalPausedTime) task.totalPausedTime = 0;
       if (task.pausedAt) {
         task.totalPausedTime += Date.now() - task.pausedAt;
       }
-      
+
       task.history.push({
         timestamp: Date.now(),
         progress: task.progress,
         message: 'Task resumed',
-        status: 'in_progress'
+        status: 'in_progress',
       });
 
       this.emitEvent('taskResumed', { taskId, task });
     }
-    
+
     return task;
   }
 
@@ -580,11 +586,11 @@ export class ProgressTracker {
         this.tasks.delete(taskId);
       }
     }
-    
+
     if (completedTasks.length > 0) {
       this.emitEvent('tasksCleared', { clearedTasks: completedTasks });
     }
-    
+
     return completedTasks.length;
   }
 
@@ -595,31 +601,34 @@ export class ProgressTracker {
 
   getTaskStats() {
     const tasks = Array.from(this.tasks.values());
-    
+
     let totalProcessingTime = 0;
     let completedCount = 0;
-    
-    tasks.forEach(task => {
+
+    tasks.forEach((task) => {
       if (task.completedAt && task.startedAt) {
-        totalProcessingTime += (task.completedAt - task.startedAt);
+        totalProcessingTime += task.completedAt - task.startedAt;
         completedCount++;
       }
     });
-    
-    const averageProcessingTime = completedCount > 0 ? totalProcessingTime / completedCount : 0;
-    
+
+    const averageProcessingTime =
+      completedCount > 0 ? totalProcessingTime / completedCount : 0;
+
     return {
       totalTasks: tasks.length,
       averageProcessingTime,
-      oldestTask: tasks.length > 0 ? Math.min(...tasks.map(t => t.createdAt)) : null,
-      newestTask: tasks.length > 0 ? Math.max(...tasks.map(t => t.createdAt)) : null,
+      oldestTask:
+        tasks.length > 0 ? Math.min(...tasks.map((t) => t.createdAt)) : null,
+      newestTask:
+        tasks.length > 0 ? Math.max(...tasks.map((t) => t.createdAt)) : null,
       tasksPerStatus: {
-        created: tasks.filter(t => t.status === 'created').length,
-        in_progress: tasks.filter(t => t.status === 'in_progress').length,
-        completed: tasks.filter(t => t.status === 'completed').length,
-        failed: tasks.filter(t => t.status === 'failed').length,
-        cancelled: tasks.filter(t => t.status === 'cancelled').length
-      }
+        created: tasks.filter((t) => t.status === 'created').length,
+        in_progress: tasks.filter((t) => t.status === 'in_progress').length,
+        completed: tasks.filter((t) => t.status === 'completed').length,
+        failed: tasks.filter((t) => t.status === 'failed').length,
+        cancelled: tasks.filter((t) => t.status === 'cancelled').length,
+      },
     };
   }
 }
