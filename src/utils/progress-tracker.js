@@ -595,7 +595,6 @@ export class ProgressTracker {
 
   getTaskStats() {
     const tasks = Array.from(this.tasks.values());
-    const now = Date.now();
     
     let totalProcessingTime = 0;
     let completedCount = 0;

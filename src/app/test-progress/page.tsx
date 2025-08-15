@@ -10,10 +10,34 @@ export default function TestProgressPage() {
   const [progressTracker] = useState(() => new ProgressTracker());
   const [queue] = useState(() => new ConversionQueue());
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
-  const [queueStatus, setQueueStatus] = useState({
+  const [queueStatus, setQueueStatus] = useState<{
+    queued: number;
+    active: number;
+    progress: {
+      fileProgressPercent: number;
+      byteProgressPercent: number;
+      processedFiles?: number;
+      totalFiles?: number;
+      processedBytes?: number;
+      totalBytes?: number;
+      throughputBytesPerSecond?: number;
+      estimatedTimeRemaining?: number | null;
+      elapsedTime?: number;
+      isComplete?: boolean;
+    };
+  }>({
     queued: 0,
     active: 0,
-    progress: { fileProgressPercent: 0 }
+    progress: { 
+      fileProgressPercent: 0,
+      byteProgressPercent: 0,
+      processedFiles: 0,
+      totalFiles: 0,
+      processedBytes: 0,
+      totalBytes: 0,
+      throughputBytesPerSecond: 0,
+      estimatedTimeRemaining: null
+    }
   });
 
   const addLog = (message: string) => {
@@ -76,19 +100,19 @@ export default function TestProgressPage() {
     addLog('📋 Testing queue system...');
     
     // Set up event listeners
-    const progressHandler = (data: any) => {
+    const progressHandler = (data: { taskId: string; progress: number; message: string }) => {
       addLog(`📊 Progress [${data.taskId.slice(-6)}]: ${Math.round(data.progress)}% - ${data.message}`);
     };
     
-    const completeHandler = (data: any) => {
+    const completeHandler = (data: { taskId: string; fileName?: string }) => {
       addLog(`✅ Task completed [${data.taskId.slice(-6)}]: ${data.fileName || 'Unknown file'}`);
     };
     
-    const errorHandler = (data: any) => {
+    const errorHandler = (data: { taskId: string; error: string }) => {
       addLog(`❌ Task failed [${data.taskId.slice(-6)}]: ${data.error}`);
     };
     
-    const cancelledHandler = (data: any) => {
+    const cancelledHandler = (data: { taskId: string; message: string }) => {
       addLog(`🚫 Task cancelled [${data.taskId.slice(-6)}]: ${data.message}`);
     };
     
@@ -140,7 +164,7 @@ export default function TestProgressPage() {
     );
     
     // Set up cancellation listener
-    const cancelHandler = (data: any) => {
+    const cancelHandler = (data: { taskId: string; message: string }) => {
       addLog(`🚫 Task was cancelled: ${data.message}`);
       setCurrentTaskId(null);
     };
@@ -185,7 +209,7 @@ export default function TestProgressPage() {
       { type: 'image/heic' }
     );
     
-    const errorHandler = (data: any) => {
+    const errorHandler = (data: { taskId: string; error: string }) => {
       addLog(`❌ Error caught: ${data.error} (Task: ${data.taskId.slice(-6)}...)`);
     };
     
@@ -219,7 +243,7 @@ export default function TestProgressPage() {
       ));
     }
     
-    const batchHandler = (data: any) => {
+    const batchHandler = (data: { type: string; results?: unknown[]; errors?: unknown[] }) => {
       if (data.type === 'batch') {
         addLog(`📦 Batch completed: ${data.results?.length || 0} files processed, ${data.errors?.length || 0} errors`);
       }
@@ -258,7 +282,10 @@ export default function TestProgressPage() {
     setQueueStatus({
       queued: 0,
       active: 0,
-      progress: { fileProgressPercent: 0 }
+      progress: { 
+        fileProgressPercent: 0,
+        byteProgressPercent: 0
+      }
     });
     addLog('✅ System reset complete');
   };
